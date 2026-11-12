@@ -855,7 +855,8 @@ def crush_login() -> dict:
 # ---------------------------------------------------------------------------
 
 def codex_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
-    return _generic_json_worker(["codex", "exec", task, "--json", "--sandbox", "read-only"], task, workdir, timeout)
+    return _generic_json_worker(["codex", "exec", task, "--json", "--sandbox", "read-only",
+                                 "--skip-git-repo-check"], task, workdir, timeout)
 
 
 def codex_extract(rc: int, out: str, err: str) -> Result:
