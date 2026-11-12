@@ -169,6 +169,12 @@ def _pi_worker(fa, provider: str, automatic: bool, priority: int):
                 last_err = f"{provider}: {exc}"
                 continue
 
+            # Skip models the provider does not offer on the free route; try the
+            # next entry instead of failing the whole worker.
+            if rc == 2 and err and "not verified free" in err:
+                last_err = err
+                continue
+
             # Check for exhaustion signals in response
             exhausted = False
             if rc in (429, 402) or (err and any(p in err.lower() for p in
