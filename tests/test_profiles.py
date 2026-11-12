@@ -265,8 +265,8 @@ class CredentialTests(Tmp):
 
     def test_empty_env_value_falls_through_to_file(self):
         path = self.write("e.env", "GROQ_API_KEY=file\n")
-        self.assertEqual(p.credential_for("groq", path, {"GROQ_API_KEY": "  "}), "file")
-        self.assertIsNone(p.credential_for("groq", self.tmp / "absent", {"GROQ_API_KEY": ""}))
+        self.assertEqual(p.credential_for("groq-cloud", path, {"GROQ_API_KEY": "  "}), "file")
+        self.assertIsNone(p.credential_for("groq-cloud", self.tmp / "absent", {"GROQ_API_KEY": ""}))
 
     def test_ignores_dollar_and_command_syntax(self):
         path = self.write("e.env", "MISTRAL_API_KEY=file\n")
@@ -279,7 +279,7 @@ class CredentialTests(Tmp):
         expected = {
             "nvidia": "NVIDIA_API_KEY",
             "openrouter": "OPENROUTER_API_KEY",
-            "groq": "GROQ_API_KEY",
+            "groq-cloud": "GROQ_API_KEY",
             "cerebras": "CEREBRAS_API_KEY",
             "mistral": "MISTRAL_API_KEY",
             "gemini": "GEMINI_API_KEY",

@@ -38,7 +38,7 @@ PROVIDERS = {
         "base_url": "https://openrouter.ai/api/v1",
         "free_policy": "free_only", "pi": True,
     },
-    "groq": {
+    "groq-cloud": {
         "base_url": "https://api.groq.com/openai/v1",
         "free_policy": "account_free_tier_unverified", "pi": True,
     },
@@ -77,6 +77,270 @@ PROVIDERS = {
     "huggingface": {
         "base_url": None,
         "free_policy": "credential_only", "pi": False,
+    },
+    "aion-labs": {
+        "base_url": "https://api.aionlabs.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "ai-horde": {
+        "base_url": "https://oai.aihorde.net/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "aihubmix": {
+        "base_url": "https://aihubmix.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "anyapi": {
+        "base_url": "https://api.anyapi.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "api-airforce": {
+        "base_url": "https://api.airforce/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "arli-ai": {
+        "base_url": "https://api.arliai.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "bazaarlink": {
+        "base_url": "https://api.bazaarlink.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "bytez": {
+        "base_url": "https://api.bytez.com/models/v2/openai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "cerebrium": {
+        "base_url": "https://api.cortex.cerebrium.ai/v4",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "dahl-inference": {
+        "base_url": "https://inference.dahl.global/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "experiential-labs": {
+        "base_url": "https://api.experientiallabs.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "fireworks-ai": {
+        "base_url": "https://api.fireworks.ai/inference/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "freeinference": {
+        "base_url": "https://freeinference.org/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "friendli-ai": {
+        "base_url": "https://inference.friendli.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "gonka-broker": {
+        "base_url": "https://proxy.gonkabroker.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "gonkarouter": {
+        "base_url": "https://api.gonkarouter.io/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "google-vertex-ai-express-mode": {
+        "base_url": "https://aiplatform.googleapis.com/v1/publishers/google/models/MODEL_ID:generateContent",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "grokified": {
+        "base_url": "https://api.grokified.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "hetzner-inference": {
+        "base_url": "https://inference.hetzner.com/api/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "hpc-ai": {
+        "base_url": "https://api.hpc-ai.com/inference/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "hyperbolic": {
+        "base_url": "https://api.hyperbolic.ai/inference/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "ibm-watsonx": {
+        "base_url": "https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2025-02-11",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "iflytek-spark": {
+        "base_url": "https://spark-api-open.xf-yun.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "inception-labs": {
+        "base_url": "https://api.inceptionlabs.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "inferbase": {
+        "base_url": "https://api.inferbase.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "iteracompute": {
+        "base_url": "https://api.iteracompute.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "jina-ai": {
+        "base_url": "https://api.jina.ai/v1/embeddings",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "kilo-ai-gateway": {
+        "base_url": "https://ai-gateway.kilo.ai/api/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "kiosapi": {
+        "base_url": "https://api.kiosapi.id/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "llm-kiwi": {
+        "base_url": "https://api.llm.kiwi/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "llm7-io": {
+        "base_url": "https://api.llm7.io/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "llmtr": {
+        "base_url": "https://llmtr.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "meganova": {
+        "base_url": "https://api.meganova.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "mixlayer": {
+        "base_url": "https://models.mixlayer.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "moark": {
+        "base_url": "https://api.moark.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "modelscope": {
+        "base_url": "https://api-inference.modelscope.cn/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "nous-portal": {
+        "base_url": "https://inference-api.nousresearch.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "novai": {
+        "base_url": "https://aiapi-pro.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "novita-ai": {
+        "base_url": "https://api.novita.ai/v3/openai",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "nvidia-nim": {
+        "base_url": "https://integrate.api.nvidia.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "ollama-cloud": {
+        "base_url": "https://ollama.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "opentyphoon": {
+        "base_url": "https://api.opentyphoon.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "ovh-ai": {
+        "base_url": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "pollinations-ai": {
+        "base_url": "https://gen.pollinations.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "qwen-alibaba": {
+        "base_url": "https://dashscope-intl.aliyuncs.com/api/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "regolo-ai": {
+        "base_url": "https://api.regolo.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "replicate": {
+        "base_url": "https://api.replicate.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "requesty": {
+        "base_url": "https://router.requesty.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "routeway": {
+        "base_url": "https://api.routeway.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "sail-research": {
+        "base_url": "https://api.sailresearch.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "sarvam-ai": {
+        "base_url": "https://api.sarvam.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "scaleway": {
+        "base_url": "https://api.scaleway.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "sea-lion": {
+        "base_url": "https://api.sea-lion.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "sensenova": {
+        "base_url": "https://token.sensenova.cn/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "siliconflow": {
+        "base_url": "https://api.siliconflow.cn/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "simplellm": {
+        "base_url": "https://api.simplellm.eu/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "tencent-cloud-tokenhub": {
+        "base_url": "https://tokenhub-intl.tencentmaas.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "token-harbor": {
+        "base_url": "https://tokenharbor.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "upstage": {
+        "base_url": "https://api.upstage.ai/v1/solar",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "vectoree": {
+        "base_url": "https://vectoree.ai/api/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "vercel-ai-gateway": {
+        "base_url": "https://ai-gateway.vercel.sh/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "vlm-run": {
+        "base_url": "https://gateway.vlm.run/v1/openai",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "voyage-ai": {
+        "base_url": "https://api.voyageai.com/v1/embeddings",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "z-ai": {
+        "base_url": "https://api.z.ai/api/paas/v4",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "zhipu-bigmodel": {
+        "base_url": "https://open.bigmodel.cn/api/paas/v4",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "zro": {
+        "base_url": "https://zro.moonmath.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
     },
 }
 

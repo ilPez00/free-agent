@@ -85,15 +85,15 @@ class KeyAndPolicyTests(unittest.TestCase):
         self.assertTrue(by_name["nvidia"]["credential_present"])
         self.assertEqual(by_name["nvidia"]["state"], "dev_evaluation_opt_in")
         self.assertEqual(by_name["openrouter"]["state"], "free_only_discovery")
-        self.assertEqual(by_name["groq"]["state"], "no_credential")
-        self.assertFalse(by_name["groq"]["credential_present"])
-        self.assertIsInstance(by_name["groq"]["credential_present"], bool)
+        self.assertEqual(by_name["groq-cloud"]["state"], "no_credential")
+        self.assertFalse(by_name["groq-cloud"]["credential_present"])
+        self.assertIsInstance(by_name["groq-cloud"]["credential_present"], bool)
         self.assertEqual(by_name["cloudflare"]["free_policy"], "account_free_tier_unverified")
 
     def test_free_policies_are_closed(self):
         self.assertEqual(pv.PROVIDERS["openrouter"]["free_policy"], "free_only")
         self.assertEqual(pv.PROVIDERS["nvidia"]["free_policy"], "dev_evaluation")
-        for name in ("groq", "cerebras", "gemini", "sambanova"):
+        for name in ("groq-cloud", "cerebras", "gemini", "sambanova"):
             self.assertEqual(pv.PROVIDERS[name]["free_policy"],
                              "account_free_tier_unverified")
         for name in ("mistral", "cohere", "together", "deepinfra"):
@@ -110,7 +110,7 @@ class KeyAndPolicyTests(unittest.TestCase):
         expected = {
             "nvidia": "https://integrate.api.nvidia.com/v1",
             "openrouter": "https://openrouter.ai/api/v1",
-            "groq": "https://api.groq.com/openai/v1",
+            "groq-cloud": "https://api.groq.com/openai/v1",
             "cerebras": "https://api.cerebras.ai/v1",
             "mistral": "https://api.mistral.ai/v1",
             "gemini": "https://generativelanguage.googleapis.com/v1beta/openai",
@@ -142,20 +142,20 @@ class DiscoveryTests(unittest.TestCase):
                               (429, "rate_limited"), (0, "network_error"),
                               (500, "http_error")):
             with self.subTest(status=status):
-                with profiles({"groq": "g-key"}), \
+                with profiles({"groq-cloud": "g-key"}), \
                         patch.object(pv, "_http_json", return_value=(status, None, error)):
-                    result = pv.discover("groq", ENV)
+                    result = pv.discover("groq-cloud", ENV)
                 self.assertFalse(result["ok"])
                 self.assertEqual(result["status"], status)
                 self.assertEqual(result["error"], error)
 
     def test_bad_payload(self):
-        with profiles({"groq": "g-key"}), \
+        with profiles({"groq-cloud": "g-key"}), \
                 patch.object(pv, "_http_json", return_value=(200, {"nope": 1}, "")):
-            self.assertEqual(pv.discover("groq", ENV)["error"], "unexpected_response")
-        with profiles({"groq": "g-key"}), \
+            self.assertEqual(pv.discover("groq-cloud", ENV)["error"], "unexpected_response")
+        with profiles({"groq-cloud": "g-key"}), \
                 patch.object(pv, "_http_json", return_value=(200, None, "bad_json")):
-            self.assertEqual(pv.discover("groq", ENV)["error"], "bad_json")
+            self.assertEqual(pv.discover("groq-cloud", ENV)["error"], "bad_json")
 
     def test_zero_price_is_decimal_and_finite(self):
         def price(prompt, completion):
@@ -221,9 +221,9 @@ class RunPiTests(unittest.TestCase):
         self.assertIn("no credential", err)
 
     def test_other_providers_require_explicit_model(self):
-        with profiles({"groq": "g-key"}), patch.object(pv, "_spawn",
-                                                       side_effect=AssertionError):
-            rc, _, err = pv.run_pi("groq", "", "task", "/tmp", 10, ENV)
+        with profiles({"groq-cloud": "g-key"}), patch.object(pv, "_spawn",
+                                                          side_effect=AssertionError):
+            rc, _, err = pv.run_pi("groq-cloud", "", "task", "/tmp", 10, ENV)
         self.assertEqual(rc, 2)
         self.assertIn("explicit model", err)
 
