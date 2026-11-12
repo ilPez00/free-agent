@@ -71,8 +71,8 @@ PROVIDERS = {
         "free_policy": "paid_or_trial_opt_in", "pi": True,
     },
     "cloudflare": {
-        "base_url": None,
-        "free_policy": "credential_only", "pi": False,
+        "base_url": "https://api.cloudflare.com/client/v4/accounts",
+        "free_policy": "account_free_tier_unverified", "pi": False,
     },
     "huggingface": {
         "base_url": None,
@@ -293,6 +293,32 @@ def _spawn(cmd, cwd, timeout, env):
 
 def _redact(text: str, key: str) -> str:
     return text.replace(key, "[REDACTED]") if key else text
+
+
+def run_cloudflare(model: str, task: str, workdir: str, timeout: float,
+                   env_path, account_id: str):
+    """Run one Cloudflare Workers AI chat completion. Key stays in the header."""
+    key = get_key("cloudflare", env_path)
+    if not key:
+        return 78, "", "cloudflare: no credential"
+    if not account_id:
+        return 78, "", "cloudflare: account_id required"
+    url = f"https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/v1/chat/completions"
+    payload = json.dumps({"model": model, "messages": [{"role": "user", "content": task}],
+                          "max_tokens": 8192}).encode()
+    req = Request(url, data=payload, headers={"Authorization": f"Bearer {key}",
+                                               "Content-Type": "application/json"})
+    try:
+        with build_opener(_SameOriginRedirect).open(req, timeout=max(1, min(float(timeout), 3600))) as resp:
+            body = resp.read(MAX_BODY)
+            data = json.loads(body.decode("utf-8", "replace"))
+    except HTTPError as exc:
+        return exc.code, "", "cloudflare: http_error"
+    except Exception:
+        return 0, "", "cloudflare: network_error"
+    choices = data.get("choices") or []
+    text = ((choices[0].get("message") or {}).get("content") or "") if choices else ""
+    return (0 if text else 1), text, "" if text else "cloudflare: empty response"
 
 
 def run_pi(provider: str, model: str, task: str, workdir: str, timeout: float,

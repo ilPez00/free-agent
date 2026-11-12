@@ -255,8 +255,62 @@ def _config_worker(fa, agent):
     )
 
 
+def _cf_account_id() -> str:
+    return os.environ.get("CLOUDFLARE_ACCOUNT_ID") or profiles._named_config_value("cloudflare", "account_id") or ""
+
+
+def _cf_model() -> str:
+    return os.environ.get(OPT_IN_MODEL_ENV) or profiles._named_config_value("cloudflare", "model") or ""
+
+
+def _cf_worker(fa):
+    def run(task, workdir, timeout):
+        model = _cf_model()
+        account = _cf_account_id()
+        if not model or not account:
+            return 78, "", "cloudflare: model/account not configured (providers setup cloudflare)"
+        return pv.run_cloudflare(model, task, workdir, timeout, env_path(), account)
+
+    def extract(rc, out, err):
+        try:
+            payload = json.loads(out)
+        except ValueError:
+            text = out.strip()
+            return fa.Result(rc == 0 and bool(text), text,
+                             reason="cloudflare: no JSON response" if rc == 0 else "cloudflare: failed")
+        content = payload.get("result") if isinstance(payload.get("result"), dict) else payload
+        text = ((content.get("response") or "") if isinstance(content, dict) else "")
+        if not text:
+            text = ((payload.get("choices") or [{}])[0].get("message") or {}).get("content", "")
+        if not isinstance(text, str):
+            text = ""
+        ok = rc == 0 and bool(text) and not payload.get("errors")
+        return fa.Result(ok, text, reason="" if ok else (payload.get("errors") or "cloudflare: failed"),
+                         model=_cf_model() or "cloudflare", cost="unknown")
+
+    def quota():
+        return {"available": None, "pct": None,
+                "text": "Cloudflare Workers AI; account quota unknown", "logged_in": None}
+
+    def login():
+        if _key("cloudflare") and _cf_account_id():
+            return {"logged_in": None, "credential_present": True,
+                    "text": "Cloudflare token/account configured (unverified)"}
+        return {"logged_in": False, "credential_present": bool(_key("cloudflare")),
+                "text": "Cloudflare token/account not fully configured"}
+
+    return fa.Worker(
+        name="cloudflare", description="Cloudflare Workers AI (explicit opt-in)",
+        priority=66, headless=True, reauth="Cloudflare dashboard token/account",
+        run=run, extract=extract, quota=quota, login=login,
+        installed=lambda: True, roles=["executor"], automatic=False,
+        specialty="implementation", model=_cf_model())
+
+
 def _native_extras(fa):
-    """OAuth Gemini CLI is opt-in; its account/config is never inferred."""
+    """Cloudflare Workers AI plus OAuth Gemini CLI; account/config explicit."""
+    workers = {"cloudflare": _cf_worker(fa)}
+
     def run(task, workdir, timeout):
         # Minimal env keeps the stored Google login (HOME) without inheriting
         # unrelated variables or silently opting into paid Vertex/API.
@@ -275,14 +329,15 @@ def _native_extras(fa):
         return fa.Result(rc == 0 and bool(text) and not payload.get("error"), text,
                          reason="" if text else "Gemini login/configuration required",
                          model="gemini-oauth", cost="unknown")
-    return {"gemini": fa.Worker(
+    workers["gemini"] = fa.Worker(
         name="gemini", description="Google-login coding CLI; account allowance",
         priority=65, headless=True, reauth="gemini (official Google login)",
         run=run, extract=extract,
         quota=lambda: {"text": "Use Gemini /stats model; account quota unknown"},
         login=lambda: {"logged_in": None, "text": "Google login not probed"},
         installed=lambda: shutil.which("gemini") is not None,
-        roles=["executor"], automatic=False, specialty="implementation")}
+        roles=["executor"], automatic=False, specialty="implementation")
+    return workers
 
 
 def _builtin_names() -> set[str]:
@@ -365,17 +420,21 @@ def _fail(args, message: str) -> int:
 # agent / roles commands
 # ---------------------------------------------------------------------------
 
-def _edit_config(path):
+def _edit_config(path, providers=None):
     if not os.path.exists(path):
-        config = {"version": profiles.VERSION, "agents": [], "roles": {}}
+        config = {"version": profiles.VERSION, "agents": [], "roles": {}, "providers": providers or {}}
         try:
             profiles.validate_config(config)
         except ValueError:
             return {"version": profiles.VERSION, "agents": [], "roles": {
                 DEFAULT_ROLE: {"description": "Import an agent",
-                               "prompt": DEFAULT_ROLE_PROMPT, "tools": []}}}
+                               "prompt": DEFAULT_ROLE_PROMPT, "tools": []}},
+                "providers": providers or {}}
         return config
-    return profiles.load_config(path)
+    config = profiles.load_config(path)
+    if providers:
+        config["providers"] = providers
+    return config
 
 
 def _agent_payload(path, config):
@@ -534,9 +593,39 @@ def _models_payload(name, result):
             "models": models}
 
 
+def _provider_config_setup(args) -> int:
+    path = args.config or config_path()
+    provider = args.name
+    if provider not in profiles.KEY_ALIASES:
+        return _fail(args, f"unknown provider: {provider}")
+    account_id = args.account_id or os.environ.get("CLOUDFLARE_ACCOUNT_ID") or ""
+    model = args.model or os.environ.get(OPT_IN_MODEL_ENV) or ""
+    if provider == "cloudflare":
+        if not account_id:
+            return _fail(args, "cloudflare: account_id required")
+        if not model:
+            return _fail(args, "cloudflare: explicit model required")
+    providers = {provider: {"account_id": account_id, "model": model}}
+    try:
+        config = _edit_config(path)
+        existing = config.get("providers") or {}
+        existing.update(providers)
+        config["providers"] = existing
+        profiles.save_config(path, config)
+    except (ValueError, OSError) as exc:
+        return _fail(args, str(exc))
+    _emit(args, {"ok": True, "config": path, "provider": provider,
+                 "account_id_set": bool(account_id), "model": model or None},
+          f"configured {provider} in {path}")
+    return 0
+
+
 def cmd_providers(args) -> int:
     path = args.env_file or env_path()
     try:
+        if args.provider_cmd == "setup":
+            return _provider_config_setup(args)
+
         if args.provider_cmd == "list":
             rows = pv.inventory(path)
             lines = [f"env file: {path}"] + [
@@ -548,6 +637,28 @@ def cmd_providers(args) -> int:
             return 0
 
         if args.provider_cmd == "models":
+            if args.name == "cloudflare":
+                account = os.environ.get("CLOUDFLARE_ACCOUNT_ID") or profiles.named_config_value(
+                    "cloudflare", "account_id")
+                if not account:
+                    return _fail(args, "cloudflare: account_id required")
+                key = _key("cloudflare", path)
+                if not key:
+                    return _fail(args, "cloudflare: no credential")
+                status, data, error = pv._http_json(
+                    f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/models/search"
+                    f"?task=Text%20Generation&per_page=100", key)
+                if status != 200 or data is None:
+                    return _fail(args, f"cloudflare: {error or 'http_error'}")
+                raw = data.get("result") or []
+                rows = [{"id": m.get("name"), "name": None,
+                         "tools": m.get("properties") and "tools" in str(m.get("properties"))}
+                        for m in raw if isinstance(m, dict) and m.get("name")]
+                payload = {"ok": True, "provider": "cloudflare", "status": status,
+                           "error": "", "models": rows}
+                _emit(args, payload, "\n".join([f"cloudflare: {status}"] + [
+                    f"{row['id']} tools={row['tools']}" for row in rows]))
+                return 0
             payload = _models_payload(args.name, pv.discover(args.name, path))
             lines = [f"{args.name}: {payload['status']} {payload['error']}".strip()] + [
                 "{id} tools={tools}".format(**model) for model in payload["models"]
@@ -560,8 +671,18 @@ def cmd_providers(args) -> int:
             if not os.path.isdir(workdir):
                 return _fail(args, f"workdir not found: {workdir}")
             model = args.model or pv.DEFAULT_MODELS.get(args.name) or ""
-            rc, out, err = pv.run_pi(args.name, model, args.task, workdir,
-                                     args.timeout, path, read_only=args.read_only)
+            if args.name == "cloudflare":
+                account = os.environ.get("CLOUDFLARE_ACCOUNT_ID") or profiles.named_config_value(
+                    "cloudflare", "account_id")
+                if not account:
+                    return _fail(args, "cloudflare: account_id required")
+                if not model:
+                    return _fail(args, "cloudflare: explicit model required")
+                rc, out, err = pv.run_cloudflare(model, args.task, workdir, args.timeout,
+                                                 path, account)
+            else:
+                rc, out, err = pv.run_pi(args.name, model, args.task, workdir,
+                                         args.timeout, path, read_only=args.read_only)
             result = _FA.validated_extract(_FA.pi_extract, rc, out, err)
             result.model = model or args.name
             # Only an OpenRouter run is verified free by run_pi; never invent 0.

@@ -1698,6 +1698,13 @@ def main(argv: list[str] | None = None) -> int:
     prov.add_argument("--env-file", default=None,
                       help="env file with credentials (default: FREE_AGENT_ENV_FILE or ~/.env)")
     psub = prov.add_subparsers(dest="provider_cmd", required=True)
+    psetup = psub.add_parser("setup", help="persist provider account/model config")
+    psetup.add_argument("name")
+    psetup.add_argument("--account-id", default=None)
+    psetup.add_argument("--model", default=None)
+    psetup.add_argument("--config", default=None)
+    psetup.add_argument("--json", action="store_true")
+    psetup.set_defaults(func=extensions._provider_config_setup)
     plist = psub.add_parser("list", help="credential presence and free policy (no values)")
     plist.add_argument("--json", action="store_true")
     plist.set_defaults(func=extensions.cmd_providers)

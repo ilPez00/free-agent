@@ -34,15 +34,11 @@ before the argument parser is built, so `--worker`, `--role`, `--planner` and
 | `pi-nvidia` | `providers.DEFAULT_MODELS["nvidia"]` | only when a credential is present |
 | `pi-openrouter` | `providers.DEFAULT_MODELS["openrouter"]` | only when a credential is present |
 
-Registration and `status` never call a provider. `installed` checks only that
-`pi` exists; the credential is read lazily at run/login time. `login` reports
-"credential present" or "no credential" and never prints the key.
-
 The remaining providers are **opt-in** and are not registered unless
 `FREE_AGENT_PROVIDER_MODEL` is set to a model id:
 
 ```
-pi-groq  pi-cerebras  pi-mistral  pi-gemini  pi-sambanova  pi-cohere  pi-together  pi-deepinfra
+pi-groq  pi-cerebras  pi-mistral  pi-gemini  pi-cohere  pi-together  pi-deepinfra
 ```
 
 They are never `automatic`, even with a key, because their free tier is
@@ -51,18 +47,35 @@ unverified or may bill. Select one explicitly with `--worker`.
 ### `providers` commands
 
 ```sh
+free-agent providers setup cloudflare --account-id ACCOUNT_ID --model '@cf/meta/llama-3.1-8b-fast-v2' [--config PATH] [--json]
 free-agent providers [--env-file PATH] list [--json]
 free-agent providers [--env-file PATH] models NAME [--json]
 free-agent providers [--env-file PATH] run NAME TASK [--model MODEL] \
     [-w DIR] [--timeout SEC] [--read-only] [--json]
 ```
 
+* `setup` persists non-secret provider account/model settings in the agent config.
 * `list` prints credential presence and free policy. No values.
 * `models` prints a sanitized catalog (`id`, `name`, `tools` only).
 * `run` launches one isolated Pi process. The key travels only inside
   `providers.run_pi` (child environment), never in argv.
 * `cost` is `0` only for an OpenRouter run that `run_pi` verified free;
   every other provider reports `unknown`. It is never faked as zero.
+
+### Cloudflare Workers AI
+
+```sh
+free-agent providers setup cloudflare \
+  --account-id ee4920c6d8e0a7d0f7946f5de532a5f7 \
+  --model '@cf/meta/llama-3.1-8b-fast-v2'
+free-agent providers models cloudflare --json
+free-agent run 'your task' --worker cloudflare -w /path/to/repo --json
+```
+
+The Cloudflare token is read from `cloudflare` (lowercase) in `~/.env`; the
+32-character account ID is stored in the config by `providers setup`.
+Workers AI free entitlement is account-dependent; the route is explicit opt-in
+and cost is reported as unknown.
 
 ## User agent config
 

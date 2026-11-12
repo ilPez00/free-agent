@@ -88,7 +88,7 @@ class KeyAndPolicyTests(unittest.TestCase):
         self.assertEqual(by_name["groq"]["state"], "no_credential")
         self.assertFalse(by_name["groq"]["credential_present"])
         self.assertIsInstance(by_name["groq"]["credential_present"], bool)
-        self.assertEqual(by_name["cloudflare"]["free_policy"], "credential_only")
+        self.assertEqual(by_name["cloudflare"]["free_policy"], "account_free_tier_unverified")
 
     def test_free_policies_are_closed(self):
         self.assertEqual(pv.PROVIDERS["openrouter"]["free_policy"], "free_only")
@@ -99,7 +99,7 @@ class KeyAndPolicyTests(unittest.TestCase):
         for name in ("mistral", "cohere", "together", "deepinfra"):
             self.assertEqual(pv.PROVIDERS[name]["free_policy"],
                              "paid_or_trial_opt_in")
-        for name in ("cloudflare", "huggingface"):
+        for name in ("huggingface",):
             cfg = pv.PROVIDERS[name]
             self.assertIsNone(cfg["base_url"])
             self.assertFalse(cfg["pi"])
@@ -132,8 +132,8 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(result["models"], [])
 
     def test_credential_only_not_runnable(self):
-        with profiles({"cloudflare": "cf-key"}):
-            result = pv.discover("cloudflare", ENV)
+        with profiles({"huggingface": "hf-key"}):
+            result = pv.discover("huggingface", ENV)
         self.assertFalse(result["ok"])
         self.assertEqual(result["error"], "not_runnable")
 

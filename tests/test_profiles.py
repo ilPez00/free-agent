@@ -101,7 +101,8 @@ class ValidationTests(Tmp):
 
     def test_accepts_empty_agents_and_roles_for_repair(self):
         empty = {"version": 1, "agents": [], "roles": {}}
-        self.assertEqual(p.validate_config(empty), empty)
+        self.assertEqual(p.validate_config(empty),
+                         {"version": 1, "agents": [], "roles": {}, "providers": {}})
         with self.assertRaises(ValueError):
             p.validate_config({"version": 1, "agents": [], "roles": []})
 
@@ -253,6 +254,14 @@ class CredentialTests(Tmp):
             "env-third",
         )
         self.assertEqual(p.credential_for("nvidia", path, {}), "file-alias")
+
+    def test_lowercase_provider_alias_is_found(self):
+        path = self.write("e.env", "cloudflare=cfut-test-token\n")
+        self.assertEqual(p.credential_for("cloudflare", path), "cfut-test-token")
+
+    def test_cloudflare_token_beats_account_id(self):
+        path = self.write("e.env", "cloudflare=cfut-test-token\nCLOUDFLARE=ee4920c6d8e0a7d0f7946f5de532a5f7\n")
+        self.assertEqual(p.credential_for("cloudflare", path), "cfut-test-token")
 
     def test_empty_env_value_falls_through_to_file(self):
         path = self.write("e.env", "GROQ_API_KEY=file\n")

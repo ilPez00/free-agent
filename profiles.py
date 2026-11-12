@@ -27,6 +27,7 @@ PROMPT_PLACEHOLDERS = frozenset({"task"})
 AGENT_KEYS = frozenset({"name", "command", "roles", "specialty", "automatic",
                         "timeout", "env", "key_env"})
 ROLE_KEYS = frozenset({"description", "prompt", "tools"})
+PROVIDER_KEYS = frozenset({"account_id", "model"})
 
 # A user config must not be able to rewrite the loader path or the credential
 # scope of the child process. Shared so no credential path can bypass it.
@@ -47,7 +48,7 @@ KEY_ALIASES = {
     "mistral": ("MISTRAL_API_KEY", "AI_MISTRAL_KEY", "MISTRAL"),
     "gemini": ("GEMINI_API_KEY", "GOOGLE_API_KEY", "AI_GEMINI_KEY"),
     "huggingface": ("HF_TOKEN", "HUGGINGFACE_API_KEY", "SVC_HUGGINGFACE_TOKEN"),
-    "cloudflare": ("CLOUDFLARE_API_KEY", "CLOUDFLARE_API_TOKEN", "CLOUDFLARE"),
+    "cloudflare": ("cloudflare", "CLOUDFLARE_API_TOKEN", "CLOUDFLARE_API_KEY", "CLOUDFLARE"),
     "sambanova": ("SAMBANOVA_API_KEY", "AI_SAMBANOVA_KEY", "AI_SAMBA_NOVA_KEY", "SAMBA_NOVA_KEY"),
     "cohere": ("COHERE_API_KEY", "AI_COHERE_KEY"),
     "together": ("TOGETHER_API_KEY", "AI_TOGETHER_KEY"),
@@ -181,14 +182,52 @@ def _validate_agents(agents, roles):
     return clean
 
 
+def _validate_providers(providers):
+    if not isinstance(providers, dict):
+        _fail("providers must be a mapping")
+    clean = {}
+    for name, spec in providers.items():
+        if name not in KEY_ALIASES:
+            _fail("unknown provider: %s" % name)
+        if not isinstance(spec, dict) or set(spec) - PROVIDER_KEYS:
+            _fail("provider %s has invalid settings" % name)
+        account_id = spec.get("account_id")
+        model = spec.get("model")
+        if account_id is not None and (not isinstance(account_id, str) or len(account_id) != 32):
+            _fail("provider %s account_id must be a 32-character id" % name)
+        if model is not None and (not isinstance(model, str) or not model.strip()):
+            _fail("provider %s model must be a non-empty string" % name)
+        clean[name] = {
+            "account_id": account_id,
+            "model": model,
+        }
+    return clean
+
+
 def validate_config(data):
     """Return a normalised deep copy of a version-1 config, or raise ValueError."""
-    if not isinstance(data, dict) or set(data) - {"version", "agents", "roles"}:
-        _fail("config must be an object with version, agents and roles only")
+    if not isinstance(data, dict) or set(data) - {"version", "agents", "roles", "providers"}:
+        _fail("config must be an object with version, agents, roles and providers only")
     if data.get("version") != VERSION:
         _fail("unsupported version: %r" % (data.get("version"),))
     roles = _validate_roles(data.get("roles"))
-    return {"version": VERSION, "agents": _validate_agents(data.get("agents"), roles), "roles": roles}
+    return {"version": VERSION, "agents": _validate_agents(data.get("agents"), roles),
+            "roles": roles, "providers": _validate_providers(data.get("providers") or {})}
+
+
+def named_config_value(provider, key):
+    """Read a non-secret provider setting from the active config, if present."""
+    path = os.environ.get("FREE_AGENT_CONFIG") or str(Path.home() / ".config/free-agent/agents.json")
+    try:
+        config = load_config(path)
+    except (ValueError, OSError):
+        return None
+    value = (config.get("providers") or {}).get(provider, {}).get(key)
+    return value if isinstance(value, str) and value else None
+
+
+def _named_config_value(provider, key):
+    return named_config_value(provider, key)
 
 
 def load_config(path):
@@ -331,8 +370,11 @@ def credential_for(provider, path, environ=None):
         raise KeyError("unknown provider: %s" % provider)
     env = os.environ if environ is None else environ
     for values in (env, read_env_file(path, strict=False, keep_nonempty=True)):
+        lowered = {str(k).lower(): v for k, v in values.items()}
         for alias in aliases:
             value = _usable(values, alias)
+            if not value:
+                value = _usable(lowered, alias.lower())
             if value:
                 return value
     return None
@@ -357,4 +399,5 @@ def public_summary(config):
     ]
     roles = {name: {"description": r["description"], "tools": list(r["tools"]),
                     "prompt_chars": len(r["prompt"])} for name, r in clean["roles"].items()}
-    return {"version": clean["version"], "agents": agents, "roles": roles}
+    return {"version": clean["version"], "agents": agents, "roles": roles,
+            "providers": {name: dict(value) for name, value in clean.get("providers", {}).items()}}
