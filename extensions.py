@@ -140,25 +140,65 @@ def _pi_installed() -> bool:
     return shutil.which("pi") is not None
 
 
-def _pi_worker(fa, provider: str, automatic: bool, priority: int):
-    def run(task, workdir, timeout):
-        model = _pi_model(provider)
+def _pi_model_order(provider: str) -> list[str]:
+    """Return the model_order list for a provider from config, or default single model."""
+    import json
+    model_order = profiles.named_config_value(provider, "model_order")
+    if model_order:
         try:
-            return pv.run_pi(provider, model, task, workdir, timeout, env_path())
-        except (ValueError, OSError) as exc:
-            return 78, "", f"{provider}: {exc}"
+            return json.loads(model_order) if isinstance(model_order, str) else model_order
+        except (json.JSONDecodeError, TypeError):
+            pass
+    model = _pi_model(provider)
+    return [model] if model else []
+
+
+def _pi_worker(fa, provider: str, automatic: bool, priority: int):
+    model_order = _pi_model_order(provider)
+    default_model = model_order[0] if model_order else _pi_model(provider)
+
+    def run(task, workdir, timeout):
+        last_err = ""
+        for idx, model in enumerate(model_order):
+            try:
+                rc, out, err = pv.run_pi(provider, model, task, workdir, timeout, env_path())
+            except (ValueError, OSError) as exc:
+                last_err = f"{provider}: {exc}"
+                continue
+
+            # Check for exhaustion signals in response
+            exhausted = False
+            if rc in (429, 402) or (err and any(p in err.lower() for p in
+                ["quota", "rate limit", "usage limit", "exhausted", "payment required", "insufficient credits", "out of credits", "limit exceeded", "daily limit", "weekly limit", "monthly limit", "spend_limited", "model_locked", "model_unavailable", "ip_capped", "premium_slot_taken", "purchase_capacity"])):
+                exhausted = True
+
+            # Also check stdout for quota messages
+            if not exhausted and out:
+                out_lower = out.lower()
+                if any(p in out_lower for p in
+                    ["quota", "rate limit", "usage limit", "exhausted", "payment required", "insufficient credits", "out of credits", "limit exceeded", "daily limit", "weekly limit", "monthly limit", "spend_limited", "model_locked", "model_unavailable", "ip_capped", "premium_slot_taken", "purchase_capacity"]):
+                    exhausted = True
+
+            if exhausted and idx + 1 < len(model_order):
+                # Try next model
+                continue
+
+            # Success or final failure - return result
+            return rc, out, err
+
+        # All models exhausted
+        return 429, "", f"{provider}: all models in order exhausted" + (f" ({last_err})" if last_err else "")
 
     def extract(rc, out, err):
         result = fa.pi_extract(rc, out, err)
-        model = _pi_model(provider)
-        result.model = model or provider
+        result.model = default_model or provider
         result.cost = "0" if provider == "openrouter" and result.ok else "unknown"
         return result
 
     def quota():
-        model = _pi_model(provider) or "no model selected"
+        model = default_model or "no model selected"
         return {"available": None, "pct": None,
-                "text": f"Pi {provider}/{model}; no inference probe",
+                "text": f"Pi {provider}/{model}; model_order: {model_order}",
                 "logged_in": None}
 
     def login():
@@ -168,10 +208,9 @@ def _pi_worker(fa, provider: str, automatic: bool, priority: int):
         return {"logged_in": False, "credential_present": False,
                 "text": f"{provider}: no credential"}
 
-    model = _pi_model(provider)
     return fa.Worker(
         name=f"pi-{provider}",
-        description=f"Pi coding worker ({provider}/{model or 'model via env'})",
+        description=f"Pi coding worker ({provider}/{default_model or 'model via env'})",
         priority=priority,
         headless=True,
         reauth=f"pi auth login {provider}",
@@ -183,7 +222,7 @@ def _pi_worker(fa, provider: str, automatic: bool, priority: int):
         roles=["executor"],
         automatic=automatic,
         specialty="implementation",
-        model=model or "",
+        model=default_model or "",
     )
 
 
@@ -263,13 +302,55 @@ def _cf_model() -> str:
     return os.environ.get(OPT_IN_MODEL_ENV) or profiles._named_config_value("cloudflare", "model") or ""
 
 
+def _cf_model_order() -> list[str]:
+    """Return the model_order list for Cloudflare from config, or default single model."""
+    import json
+    model_order = profiles.named_config_value("cloudflare", "model_order")
+    if model_order:
+        try:
+            return json.loads(model_order) if isinstance(model_order, str) else model_order
+        except (json.JSONDecodeError, TypeError):
+            pass
+    model = _cf_model()
+    return [model] if model else []
+
+
 def _cf_worker(fa):
+    model_order = _cf_model_order()
+    default_model = model_order[0] if model_order else _cf_model()
+
     def run(task, workdir, timeout):
-        model = _cf_model()
         account = _cf_account_id()
-        if not model or not account:
-            return 78, "", "cloudflare: model/account not configured (providers setup cloudflare)"
-        return pv.run_cloudflare(model, task, workdir, timeout, env_path(), account)
+        if not account:
+            return 78, "", "cloudflare: account not configured (providers setup cloudflare)"
+        last_err = ""
+        for idx, model in enumerate(model_order):
+            if not model:
+                continue
+            try:
+                rc, out, err = pv.run_cloudflare(model, task, workdir, timeout, env_path(), account)
+            except (ValueError, OSError) as exc:
+                last_err = f"cloudflare: {exc}"
+                continue
+
+            # Check for exhaustion signals
+            exhausted = False
+            if rc in (429, 402) or (err and any(p in err.lower() for p in
+                ["quota", "rate limit", "usage limit", "exhausted", "payment required", "insufficient credits", "out of credits", "limit exceeded", "daily limit", "weekly limit", "monthly limit", "spend_limited", "model_locked", "model_unavailable", "ip_capped", "premium_slot_taken", "purchase_capacity"])):
+                exhausted = True
+
+            if not exhausted and out:
+                out_lower = out.lower()
+                if any(p in out_lower for p in
+                    ["quota", "rate limit", "usage limit", "exhausted", "payment required", "insufficient credits", "out of credits", "limit exceeded", "daily limit", "weekly limit", "monthly limit", "spend_limited", "model_locked", "model_unavailable", "ip_capped", "premium_slot_taken", "purchase_capacity"]):
+                    exhausted = True
+
+            if exhausted and idx + 1 < len(model_order):
+                continue
+
+            return rc, out, err
+
+        return 429, "", f"cloudflare: all models in order exhausted" + (f" ({last_err})" if last_err else "")
 
     def extract(rc, out, err):
         try:
@@ -286,11 +367,11 @@ def _cf_worker(fa):
             text = ""
         ok = rc == 0 and bool(text) and not payload.get("errors")
         return fa.Result(ok, text, reason="" if ok else (payload.get("errors") or "cloudflare: failed"),
-                         model=_cf_model() or "cloudflare", cost="unknown")
+                         model=default_model or "cloudflare", cost="unknown")
 
     def quota():
         return {"available": None, "pct": None,
-                "text": "Cloudflare Workers AI; account quota unknown", "logged_in": None}
+                "text": f"Cloudflare Workers AI; model_order: {model_order}", "logged_in": None}
 
     def login():
         if _key("cloudflare") and _cf_account_id():
@@ -304,7 +385,7 @@ def _cf_worker(fa):
         priority=66, headless=True, reauth="Cloudflare dashboard token/account",
         run=run, extract=extract, quota=quota, login=login,
         installed=lambda: True, roles=["executor"], automatic=False,
-        specialty="implementation", model=_cf_model())
+        specialty="implementation", model=default_model)
 
 
 def _native_extras(fa):
@@ -420,20 +501,22 @@ def _fail(args, message: str) -> int:
 # agent / roles commands
 # ---------------------------------------------------------------------------
 
-def _edit_config(path, providers=None):
+def _edit_config(path, providers=None, cli_agents=None):
     if not os.path.exists(path):
-        config = {"version": profiles.VERSION, "agents": [], "roles": {}, "providers": providers or {}}
+        config = {"version": profiles.VERSION, "agents": [], "roles": {}, "providers": providers or {}, "cli_agents": cli_agents or []}
         try:
             profiles.validate_config(config)
         except ValueError:
             return {"version": profiles.VERSION, "agents": [], "roles": {
                 DEFAULT_ROLE: {"description": "Import an agent",
                                "prompt": DEFAULT_ROLE_PROMPT, "tools": []}},
-                "providers": providers or {}}
+                "providers": providers or {}, "cli_agents": cli_agents or []}
         return config
     config = profiles.load_config(path)
     if providers:
         config["providers"] = providers
+    if cli_agents is not None:
+        config["cli_agents"] = cli_agents
     return config
 
 
@@ -698,6 +781,182 @@ def cmd_providers(args) -> int:
     except (ValueError, OSError) as exc:
         return _fail(args, str(exc))
     return _fail(args, "unknown providers command")
+
+
+# ---------------------------------------------------------------------------
+# cli_agents command
+# ---------------------------------------------------------------------------
+
+def _cli_agent_payload(path, config):
+    cli_agents = config.get("cli_agents") if config else []
+    return {"ok": True, "config": path, "cli_agents": cli_agents}
+
+
+def cmd_cli_agents(args) -> int:
+    path = args.config or config_path()
+    try:
+        if args.cli_agent_cmd == "list":
+            config = profiles.load_config(path) if os.path.exists(path) else None
+            payload = _cli_agent_payload(path, config)
+            lines = [f"config: {path}"]
+            for ca in payload["cli_agents"]:
+                lines.append(
+                    "{name} priority={priority} automatic={automatic} headless={headless} roles={roles} model_env={model_env} model_flag={model_flag}".format(
+                        name=ca["name"], priority=ca["priority"], automatic=ca["automatic"],
+                        headless=ca["headless"], roles=",".join(ca["roles"]),
+                        model_env=ca.get("model_env") or "-", model_flag=ca.get("model_flag") or "-",
+                    )
+                )
+            if not payload["cli_agents"]:
+                lines.append("no cli agents")
+            _emit(args, payload, "\n".join(lines))
+            return 0
+
+        if args.cli_agent_cmd == "validate":
+            if not os.path.exists(path):
+                _emit(args, {"ok": True, "config": path, "exists": False, "cli_agents": 0},
+                      f"{path}: absent, builtin workers only")
+                return 0
+            config = profiles.load_config(path)
+            payload = _cli_agent_payload(path, config)
+            _emit(args, {"ok": True, "config": path, "cli_agents": len(config.get("cli_agents", []))},
+                  f"{path}: ok ({len(config.get('cli_agents', []))} cli agents)")
+            return 0
+
+        if args.cli_agent_cmd == "add":
+            config = _edit_config(path)
+            if any(ca["name"] == args.name for ca in config.get("cli_agents", [])):
+                return _fail(args, f"duplicate cli_agent name: {args.name}")
+            if args.name in _REGISTERED or args.name in _builtin_names():
+                return _fail(args, f"cli_agent {args.name!r} collides with a builtin worker")
+            try:
+                command = json.loads(args.command_json)
+            except ValueError as exc:
+                return _fail(args, f"--command-json is not valid JSON: {exc}")
+            if isinstance(command, str):
+                return _fail(args, "command must be an argv array, not a shell string")
+            if not isinstance(command, list) or not command or not all(isinstance(item, str) for item in command):
+                return _fail(args, "command must be a non-empty JSON array of strings")
+
+            ca = {
+                "name": args.name,
+                "command": command,
+                "model_filter": args.model_filter,
+                "model_env": args.model_env,
+                "model_flag": args.model_flag,
+                "quota_check": json.loads(args.quota_check_json) if args.quota_check_json else None,
+                "login_check": json.loads(args.login_check_json) if args.login_check_json else None,
+                "headless": not args.no_headless,
+                "automatic": args.automatic,
+                "priority": args.priority,
+                "roles": [r.strip() for r in args.roles.split(",")] if args.roles else ["executor"],
+                "specialty": args.specialty or "",
+                "timeout": args.timeout,
+                "env": {},
+            }
+            config.setdefault("cli_agents", []).append(ca)
+            profiles.save_config(path, config)
+            _emit(args, {"ok": True, "config": path, "cli_agent": args.name},
+                  f"added cli_agent {args.name} to {path}")
+            return 0
+
+        if args.cli_agent_cmd == "remove":
+            if not os.path.exists(path):
+                return _fail(args, f"config not found: {path}")
+            config = profiles.load_config(path)
+            remaining = [ca for ca in config.get("cli_agents", []) if ca["name"] != args.name]
+            if len(remaining) == len(config.get("cli_agents", [])):
+                return _fail(args, f"unknown cli_agent: {args.name}")
+            config["cli_agents"] = remaining
+            profiles.save_config(path, config)
+            _emit(args, {"ok": True, "config": path, "removed": args.name},
+                  f"removed {args.name} from {path}")
+            return 0
+
+    except (ValueError, OSError, json.JSONDecodeError) as exc:
+        return _fail(args, str(exc))
+    return _fail(args, "unknown cli_agents command")
+
+
+def _load_cli_agent_workers(fa, config_path=None):
+    """Load CLI agents from config and create Worker objects."""
+    if config_path is None:
+        config_path = config_path()
+    try:
+        config = profiles.load_config(config_path)
+    except (ValueError, OSError):
+        return {}
+    cli_agents = config.get("cli_agents", [])
+    workers = {}
+    for ca in cli_agents:
+        name = ca["name"]
+        command_template = ca["command"]
+        model_filter = ca.get("model_filter")
+        model_env = ca.get("model_env")
+        model_flag = ca.get("model_flag")
+        quota_check = ca.get("quota_check")
+        login_check = ca.get("login_check")
+        headless = ca["headless"]
+        automatic = ca["automatic"]
+        priority = ca["priority"]
+        roles = ca["roles"]
+        specialty = ca["specialty"]
+        timeout = ca["timeout"]
+        env = ca.get("env", {})
+
+        def make_runner(cmd_tpl, mf, me, mflag, qc, lc, hd, env_vars):
+            def run(task, workdir, timeout):
+                cmd = [profiles._render(item, {"task": task, "workdir": workdir}, profiles.COMMAND_PLACEHOLDERS)
+                       for item in cmd_tpl]
+                if me and mf:
+                    pass
+                if mflag and mf:
+                    pass
+                run_env = os.environ.copy()
+                run_env.update(env_vars)
+                return fa.run_cmd(cmd, cwd=workdir, timeout=timeout, env=run_env)
+            return run
+
+        def make_extractor(qc, lc):
+            def extract(rc, out, err):
+                return fa.Result(rc == 0 and bool(out.strip()), out.strip(),
+                                 reason="" if rc == 0 else "cli agent failed",
+                                 model=name, cost="unknown")
+            return extract
+
+        def make_quota(qc):
+            def quota():
+                if qc:
+                    rc, out, err = fa.run_cmd(qc, timeout=30)
+                    return {"available": None, "pct": None, "text": out.strip()[:120] if rc == 0 else "quota check failed", "logged_in": None}
+                return {"available": None, "pct": None, "text": "CLI agent (no quota check configured)", "logged_in": None}
+            return quota
+
+        def make_login(lc):
+            def login():
+                if lc:
+                    rc, out, err = fa.run_cmd(lc, timeout=30)
+                    return {"logged_in": rc == 0, "text": out.strip()[:120]}
+                return {"logged_in": None, "text": "CLI agent (no login check configured)"}
+            return login
+
+        workers[name] = fa.Worker(
+            name=name,
+            description=f"CLI agent: {name}",
+            priority=priority,
+            headless=headless,
+            reauth=f"check {name} login/quota",
+            run=make_runner(command_template, model_filter, model_env, model_flag, quota_check, login_check, headless, env),
+            extract=make_extractor(quota_check, login_check),
+            quota=make_quota(quota_check),
+            login=make_login(login_check),
+            installed=lambda n=name: shutil.which(command_template[0]) is not None,
+            roles=roles,
+            automatic=automatic,
+            specialty=specialty,
+            model="",
+        )
+    return workers
 
 
 # ---------------------------------------------------------------------------

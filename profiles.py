@@ -27,7 +27,10 @@ PROMPT_PLACEHOLDERS = frozenset({"task"})
 AGENT_KEYS = frozenset({"name", "command", "roles", "specialty", "automatic",
                         "timeout", "env", "key_env"})
 ROLE_KEYS = frozenset({"description", "prompt", "tools"})
-PROVIDER_KEYS = frozenset({"account_id", "model"})
+PROVIDER_KEYS = frozenset({"account_id", "model", "model_order"})
+CLI_AGENT_KEYS = frozenset({"name", "command", "model_filter", "model_env", "model_flag",
+                            "quota_check", "login_check", "headless", "automatic",
+                            "priority", "roles", "specialty", "timeout", "env"})
 
 # A user config must not be able to rewrite the loader path or the credential
 # scope of the child process. Shared so no credential path can bypass it.
@@ -182,6 +185,84 @@ def _validate_agents(agents, roles):
     return clean
 
 
+def _validate_cli_agents(cli_agents):
+    if not isinstance(cli_agents, list):
+        _fail("cli_agents must be a list")
+    clean = []
+    seen = set()
+    for entry in cli_agents:
+        if not isinstance(entry, dict):
+            _fail("cli_agent must be an object")
+        name = entry.get("name")
+        if not name or not NAME_RE.match(name):
+            _fail("cli_agent name must match ^[a-z][a-z0-9_-]*$")
+        if name in seen:
+            _fail("duplicate cli_agent name: %s" % name)
+        seen.add(name)
+        command = entry.get("command")
+        if not isinstance(command, list) or not command or not all(isinstance(item, str) for item in command):
+            _fail("cli_agent %s command must be a non-empty JSON array of strings" % name)
+        model_filter = entry.get("model_filter")
+        if model_filter is not None and not isinstance(model_filter, str):
+            _fail("cli_agent %s model_filter must be a string" % name)
+        model_env = entry.get("model_env")
+        if model_env is not None and (not isinstance(model_env, str) or not ENV_NAME_RE.match(model_env)):
+            _fail("cli_agent %s model_env must be an env var name" % name)
+        model_flag = entry.get("model_flag")
+        if model_flag is not None and not isinstance(model_flag, str):
+            _fail("cli_agent %s model_flag must be a string" % name)
+        quota_check = entry.get("quota_check")
+        if quota_check is not None and not isinstance(quota_check, list):
+            _fail("cli_agent %s quota_check must be an argv array" % name)
+        login_check = entry.get("login_check")
+        if login_check is not None and not isinstance(login_check, list):
+            _fail("cli_agent %s login_check must be an argv array" % name)
+        headless = entry.get("headless", True)
+        if not isinstance(headless, bool):
+            _fail("cli_agent %s headless must be a boolean" % name)
+        automatic = entry.get("automatic", False)
+        if not isinstance(automatic, bool):
+            _fail("cli_agent %s automatic must be a boolean" % name)
+        priority = entry.get("priority", 50)
+        if not isinstance(priority, int) or not 1 <= priority <= 100:
+            _fail("cli_agent %s priority must be an integer from 1 to 100" % name)
+        roles = entry.get("roles", ["executor"])
+        if not isinstance(roles, list) or not roles or not all(isinstance(r, str) for r in roles):
+            _fail("cli_agent %s roles must be a non-empty list of strings" % name)
+        for r in roles:
+            if r in RESERVED_ROLES:
+                _fail("cli_agent %s uses reserved role: %s" % (name, r))
+        specialty = entry.get("specialty", "")
+        if specialty is not None and not isinstance(specialty, str):
+            _fail("cli_agent %s specialty must be a string" % name)
+        timeout = entry.get("timeout", DEFAULT_TIMEOUT)
+        if isinstance(timeout, bool) or not isinstance(timeout, int) or not 1 <= timeout <= 3600:
+            _fail("cli_agent %s timeout must be an integer from 1 to 3600" % name)
+        env = entry.get("env") or {}
+        if not isinstance(env, dict):
+            _fail("cli_agent %s env must be an object" % name)
+        for key, value in env.items():
+            if not isinstance(key, str) or not ENV_NAME_RE.match(key) or not isinstance(value, str) or "\x00" in value:
+                _fail("cli_agent %s has invalid env entry: %r" % (name, key))
+        clean.append({
+            "name": name,
+            "command": list(command),
+            "model_filter": model_filter,
+            "model_env": model_env,
+            "model_flag": model_flag,
+            "quota_check": quota_check,
+            "login_check": login_check,
+            "headless": headless,
+            "automatic": automatic,
+            "priority": priority,
+            "roles": list(roles),
+            "specialty": specialty or "",
+            "timeout": timeout,
+            "env": dict(env),
+        })
+    return clean
+
+
 def _validate_providers(providers):
     if not isinstance(providers, dict):
         _fail("providers must be a mapping")
@@ -193,26 +274,37 @@ def _validate_providers(providers):
             _fail("provider %s has invalid settings" % name)
         account_id = spec.get("account_id")
         model = spec.get("model")
-        if account_id is not None and (not isinstance(account_id, str) or len(account_id) != 32):
+        model_order = spec.get("model_order")
+        if account_id is not None and account_id != "" and (not isinstance(account_id, str) or len(account_id) != 32):
             _fail("provider %s account_id must be a 32-character id" % name)
         if model is not None and (not isinstance(model, str) or not model.strip()):
             _fail("provider %s model must be a non-empty string" % name)
+        if model_order is not None:
+            if not isinstance(model_order, list):
+                _fail("provider %s model_order must be a list" % name)
+            for i, m in enumerate(model_order):
+                if not isinstance(m, str) or not m.strip():
+                    _fail("provider %s model_order[%d] must be a non-empty string" % (name, i))
         clean[name] = {
             "account_id": account_id,
             "model": model,
+            "model_order": model_order,
         }
     return clean
 
 
 def validate_config(data):
     """Return a normalised deep copy of a version-1 config, or raise ValueError."""
-    if not isinstance(data, dict) or set(data) - {"version", "agents", "roles", "providers"}:
-        _fail("config must be an object with version, agents, roles and providers only")
+    if not isinstance(data, dict) or set(data) - {"version", "agents", "roles", "providers", "cli_agents"}:
+        _fail("config must be an object with version, agents, roles, providers and cli_agents only")
     if data.get("version") != VERSION:
         _fail("unsupported version: %r" % (data.get("version"),))
     roles = _validate_roles(data.get("roles"))
-    return {"version": VERSION, "agents": _validate_agents(data.get("agents"), roles),
-            "roles": roles, "providers": _validate_providers(data.get("providers") or {})}
+    return {"version": VERSION,
+            "agents": _validate_agents(data.get("agents"), roles),
+            "roles": roles,
+            "providers": _validate_providers(data.get("providers") or {}),
+            "cli_agents": _validate_cli_agents(data.get("cli_agents") or [])}
 
 
 def named_config_value(provider, key):
@@ -223,7 +315,11 @@ def named_config_value(provider, key):
     except (ValueError, OSError):
         return None
     value = (config.get("providers") or {}).get(provider, {}).get(key)
-    return value if isinstance(value, str) and value else None
+    if isinstance(value, str) and value:
+        return value
+    if isinstance(value, list):
+        return value
+    return None
 
 
 def _named_config_value(provider, key):

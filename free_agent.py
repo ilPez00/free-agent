@@ -780,6 +780,9 @@ def extract_json_text(out: str) -> str:
                 text = item.get("text", "")
         elif d.get("ok") is True and not t and isinstance(d.get("text"), str):
             text = d["text"]
+        # Grok CLI: top-level "text" field with stopReason
+        elif t is None and d.get("stopReason") and isinstance(d.get("text"), str):
+            text = d["text"]
         elif d.get("status") == "SUCCESS":
             text = d.get("response", "")
         if isinstance(text, str) and text.strip() and (not parts or text.strip() != parts[-1]):
@@ -1022,7 +1025,7 @@ def claude_login() -> dict:
 # ---------------------------------------------------------------------------
 
 def grok_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
-    return _generic_json_worker(["grok", "-p", task, "--output-format", "json"], task, workdir, timeout)
+    return _generic_json_worker(["grok", "-p", task, "--output-format", "json", "--always-approve"], task, workdir, timeout)
 
 
 def grok_extract(rc: int, out: str, err: str) -> Result:
@@ -1229,15 +1232,20 @@ WORKERS["hermes"] = Worker("hermes", "Hermes worker/orchestrator", 70, True,
     HERMES_BIN + " model", hermes_run, hermes_extract, hermes_quota, hermes_login,
     roles=["executor", "orchestrator"], specialty="coordination")
 
+# Make copilot, free-pi, freebuff automatic (free tiers with verified inference)
+for _name in ("copilot", "freepi", "freebuff"):
+    if _name in WORKERS:
+        WORKERS[_name].automatic = True
+
 # Unmetered/BYOK adapters must be explicitly selected: never silently spend a
 # configured paid provider just because the client itself is open source.
-for _name in ("cursor", "vibe", "crush", "qwen", "goose", "aider", "freebuff", "freepi"):
+for _name in ("cursor", "vibe", "crush", "qwen", "goose", "aider"):
     WORKERS[_name].automatic = False
 WORKERS["amp"] = Worker("amp", "BYOK/subscription harness; no free inference promised", 80, True,
     "amp login", lambda task, wd, timeout: run_cmd(["amp", "--execute", task, "--stream-json", "--visibility", "private"], cwd=wd, timeout=timeout),
     _generic_extract, lambda: {"text": "Provider quota unknown"},
     lambda: {"logged_in": None, "text": "Use amp account list; no inference probe"}, automatic=False)
-for _name in ("claude", "grok", "kimi", "vibe", "crush", "qwen", "goose", "aider", "freebuff", "freepi", "cline", "codex"):
+for _name in ("claude", "grok", "kimi", "vibe", "crush", "qwen", "goose", "aider", "cline", "codex"):
     WORKERS[_name].login = lambda: {"logged_in": None, "text": "Unknown until an authenticated run; directory presence is not proof"}
 for _name, _w in WORKERS.items():
     _binary = {"kiro": "kiro-cli", "cursor": "agent", "freepi": "free-pi-cli"}.get(_name, _name)
@@ -1245,6 +1253,19 @@ for _name, _w in WORKERS.items():
         _w.installed = lambda: os.path.isfile(HERMES_BIN) and os.access(HERMES_BIN, os.X_OK)
     else:
         _w.installed = lambda b=_binary: shutil.which(b) is not None
+
+# Load CLI agents from config and merge into WORKERS
+try:
+    cli_workers = extensions._load_cli_agent_workers(sys.modules[__name__])
+    for name, worker in cli_workers.items():
+        if name not in WORKERS:
+            WORKERS[name] = worker
+        else:
+            # Update existing worker with config values
+            worker.automatic = True
+            WORKERS[name] = worker
+except Exception:
+    pass  # Config errors are non-fatal; cli_agents remain optional
 
 
 def error_evidence(rc: int, out: str, err: str) -> str:
@@ -1692,6 +1713,40 @@ def main(argv: list[str] | None = None) -> int:
     rs.add_argument("--config", default=None)
     rs.add_argument("--json", action="store_true")
     rs.set_defaults(func=extensions.cmd_roles)
+
+    # cli agents: any CLI agent as a worker with free-model filtering
+    cli_agents = sub.add_parser("cli-agents", help="list/add/remove/validate CLI agents as workers")
+    casub = cli_agents.add_subparsers(dest="cli_agent_cmd", required=True)
+    cal = casub.add_parser("list", help="list configured CLI agents (no secrets)")
+    cal.add_argument("--config", default=None)
+    cal.add_argument("--json", action="store_true")
+    cal.set_defaults(func=extensions.cmd_cli_agents)
+    caa = casub.add_parser("add", help="add a CLI agent as a worker")
+    caa.add_argument("name")
+    caa.add_argument("--command-json", required=True, help="JSON argv array with {task} {workdir} placeholders")
+    caa.add_argument("--model-filter", default=None, help="regex to filter free models from model list")
+    caa.add_argument("--model-env", default=None, help="env var to set model (e.g. FREE_AGENT_MODEL)")
+    caa.add_argument("--model-flag", default=None, help="flag to pass model (e.g. --model)")
+    caa.add_argument("--quota-check-json", default=None, help="JSON argv array for quota check")
+    caa.add_argument("--login-check-json", default=None, help="JSON argv array for login check")
+    caa.add_argument("--no-headless", action="store_true", help="CLI requires PTY (TUI only)")
+    caa.add_argument("--automatic", action="store_true", help="include in automatic worker selection")
+    caa.add_argument("--priority", type=int, default=50, help="priority 1-100 (lower = tried first)")
+    caa.add_argument("--roles", default="executor", help="comma-separated roles")
+    caa.add_argument("--specialty", default="")
+    caa.add_argument("--timeout", type=int, default=1800)
+    caa.add_argument("--config", default=None)
+    caa.add_argument("--json", action="store_true")
+    caa.set_defaults(func=extensions.cmd_cli_agents)
+    car = casub.add_parser("remove", help="remove a CLI agent")
+    car.add_argument("name")
+    car.add_argument("--config", default=None)
+    car.add_argument("--json", action="store_true")
+    car.set_defaults(func=extensions.cmd_cli_agents)
+    cav = casub.add_parser("validate", help="validate the user config")
+    cav.add_argument("--config", default=None)
+    cav.add_argument("--json", action="store_true")
+    cav.set_defaults(func=extensions.cmd_cli_agents)
 
     # provider registry and isolated Pi runs
     prov = sub.add_parser("providers", help="list providers, model catalogs, run Pi")

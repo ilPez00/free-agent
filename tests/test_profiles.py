@@ -102,7 +102,7 @@ class ValidationTests(Tmp):
     def test_accepts_empty_agents_and_roles_for_repair(self):
         empty = {"version": 1, "agents": [], "roles": {}}
         self.assertEqual(p.validate_config(empty),
-                         {"version": 1, "agents": [], "roles": {}, "providers": {}})
+                         {"version": 1, "agents": [], "roles": {}, "providers": {}, "cli_agents": []})
         with self.assertRaises(ValueError):
             p.validate_config({"version": 1, "agents": [], "roles": []})
 

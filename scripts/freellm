@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+"""freellm — query the Free-LLM provider directory from free-agent.
+
+Usage:
+  freellm list [--category permanent|renewable|trial] [--openai-compatible] [--json]
+  freellm show <slug-or-name>
+  freellm models <slug-or-name>
+  freellm opencode <slug-or-name> [--key-env VAR] [--model ID]
+  freellm check <slug-or-name> [--key-env VAR] [--model ID] [--timeout S]
+
+Keys are read from the process environment first, then ~/.env (last
+non-empty assignment). The key itself is never printed; the source label is.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+import freellm  # noqa: E402
+
+
+def _print_provider(p: dict) -> None:
+    print(json.dumps(p, indent=2, ensure_ascii=False))
+
+
+def cmd_list(cat: dict, args) -> int:
+    rows = cat["providers"]
+    if args.category:
+        rows = [p for p in rows if args.category in p["categories"]]
+    if args.openai_compatible:
+        rows = [p for p in rows if p["openai_compatible"]]
+    if args.json:
+        print(json.dumps(rows, indent=2, ensure_ascii=False))
+        return 0
+    print(f"{'slug':28} {'cat':22} {'card':5} {'oa':3} {'name':28} example model")
+    for p in rows:
+        cat_ = ",".join(p["categories"]) or "-"
+        card = "yes" if p["card_required"] else (
+            "no" if p["card_required"] is False else "?")
+        oa = "yes" if p["openai_compatible"] else "no"
+        print(f"{p['slug']:28} {cat_:22} {card:5} {oa:3} {p['name']:28} "
+              f"{p['example_model'] or '-'}")
+    print(f"\n{len(rows)} providers")
+    return 0
+
+
+def cmd_show(cat: dict, args) -> int:
+    _print_provider(freellm.find(cat, args.provider))
+    return 0
+
+
+def cmd_models(cat: dict, args) -> int:
+    for m in freellm.find(cat, args.provider)["models"]:
+        print(m)
+    return 0
+
+
+def cmd_opencode(cat: dict, args) -> int:
+    p = freellm.find(cat, args.provider)
+    try:
+        block = freellm.opencode_snippet(p, args.key_env, args.model)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    print(json.dumps(block, indent=2))
+    return 0
+
+
+def cmd_check(cat: dict, args) -> int:
+    p = freellm.find(cat, args.provider)
+    status, text, source = freellm.check_provider(
+        p, args.model, args.timeout, args.key_env)
+    ok = status == 200 and "FREE_LLM_OK" in text
+    print(f"{p['slug']} | {args.model or p['example_model']} | "
+          f"key={source or '-'} | HTTP {status} | {'OK' if ok else 'FAIL'}")
+    if not ok:
+        print(text[:500], file=sys.stderr)
+    return 0 if ok else 1
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(prog="freellm")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    pl = sub.add_parser("list")
+    pl.add_argument("--category", choices=["permanent", "renewable", "trial"])
+    pl.add_argument("--openai-compatible", action="store_true")
+    pl.add_argument("--json", action="store_true")
+
+    for name in ("show", "models"):
+        sp = sub.add_parser(name)
+        sp.add_argument("provider")
+
+    po = sub.add_parser("opencode")
+    po.add_argument("provider")
+    po.add_argument("--key-env")
+    po.add_argument("--model")
+
+    pc = sub.add_parser("check")
+    pc.add_argument("provider")
+    pc.add_argument("--key-env")
+    pc.add_argument("--model")
+    pc.add_argument("--timeout", type=int, default=freellm.DEFAULT_TIMEOUT)
+
+    args = ap.parse_args()
+    cat = freellm.load_catalog()
+    handlers = {
+        "list": cmd_list, "show": cmd_show, "models": cmd_models,
+        "opencode": cmd_opencode, "check": cmd_check,
+    }
+    raise SystemExit(handlers[args.cmd](cat, args))
+
+
+if __name__ == "__main__":
+    main()

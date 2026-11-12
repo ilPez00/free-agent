@@ -1,0 +1,1953 @@
+{
+  "source": "https://github.com/nejib1/Free-LLM",
+  "source_readme": "/home/gio/dev/Free-LLM/README.md",
+  "provider_count": 75,
+  "providers": [
+    {
+      "slug": "agnes-ai",
+      "name": "Agnes AI",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://agnes-ai.com",
+      "base_url": "https://apihub.agnes-ai.com/v1",
+      "key_url": "https://agnes-ai.com",
+      "models": [
+        "Agnes 3.0 Flash",
+        "Agnes 2.5 Flash",
+        "Agnes Image 2.1 Flash (image)",
+        "agnes-3.0-flash"
+      ],
+      "example_model": "agnes-3.0-flash",
+      "openai_compatible": true,
+      "rate_limit": "About 30 RPM per account (video 2 RPM), per third-party listings",
+      "daily_limit": "Not published",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/agnes-ai"
+    },
+    {
+      "slug": "ai-horde",
+      "name": "AI Horde (OpenAI-compatible front)",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://aihorde.net",
+      "base_url": "https://oai.aihorde.net/v1",
+      "key_url": "https://aihorde.net",
+      "models": [
+        "Gemma 4 E4B IT",
+        "Qwen3 4B",
+        "Llama 3.2 1B Instruct",
+        "L3 8B Stheno v3.2",
+        "koboldcpp/gemma-4-E4B-it"
+      ],
+      "example_model": "koboldcpp/gemma-4-E4B-it",
+      "openai_compatible": true,
+      "rate_limit": "Queue-based; anonymous requests have the lowest priority, registered users earn kudos for priority",
+      "daily_limit": "No fixed cap (volunteer capacity)",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/ai-horde"
+    },
+    {
+      "slug": "aihubmix",
+      "name": "AIHubMix (free models)",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://aihubmix.com",
+      "base_url": "https://aihubmix.com/v1",
+      "key_url": "https://aihubmix.com",
+      "models": [
+        "Coding GLM 5.3 (free)",
+        "Coding GLM 5.3 Flash (free)",
+        "Coding Kimi K3 (free)",
+        "Coding MiniMax M3 (free)",
+        "coding-glm-5.3-free"
+      ],
+      "example_model": "coding-glm-5.3-free",
+      "openai_compatible": true,
+      "rate_limit": "5 RPM per account on most *-free routes",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "100 requests/day and 1M tokens/day per account (500 RPD on some, e.g. glm-4.7-flash-free, coding-minimax-m3-free)",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/aihubmix"
+    },
+    {
+      "slug": "aion-labs",
+      "name": "Aion Labs",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://www.aionlabs.ai/pricing/",
+      "base_url": "https://api.aionlabs.ai/v1",
+      "key_url": "https://www.aionlabs.ai/pricing/",
+      "models": [
+        "Aion 2.0",
+        "Aion 3.0 Mini",
+        "Aion 3.5 Mini",
+        "aion-labs/aion-2.0"
+      ],
+      "example_model": "aion-labs/aion-2.0",
+      "openai_compatible": true,
+      "rate_limit": "Not published (daily credit allowance)",
+      "daily_limit": "Daily free credit allowance (amount not published by Aion Labs)",
+      "monthly_limit": "Free, no billing",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/aion-labs"
+    },
+    {
+      "slug": "anyapi",
+      "name": "AnyAPI",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": false,
+      "provider_url": "https://anyapi.ai",
+      "base_url": "https://api.anyapi.ai/v1",
+      "key_url": "https://anyapi.ai",
+      "models": [
+        "See provider",
+        "model-name"
+      ],
+      "example_model": "model-name",
+      "openai_compatible": true,
+      "rate_limit": "Limited API calls on the Free plan (exact RPM not published)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "100K ANY tokens per day, free models only",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/anyapi"
+    },
+    {
+      "slug": "api-airforce",
+      "name": "Api.Airforce",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://api.airforce/",
+      "base_url": "https://api.airforce/v1",
+      "key_url": "https://api.airforce/",
+      "models": [
+        "GPT-OSS 20B",
+        "GLM-4.7 Flash",
+        "Essential AI RNJ 1",
+        "Kimi K2.7 Code",
+        "gpt-oss-20b"
+      ],
+      "example_model": "gpt-oss-20b",
+      "openai_compatible": true,
+      "rate_limit": "1 RPM",
+      "daily_limit": "1,000 requests/day",
+      "monthly_limit": "Free plan, $0/month",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/api-airforce"
+    },
+    {
+      "slug": "arli-ai",
+      "name": "Arli AI",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://www.arliai.com/pricing",
+      "base_url": "https://api.arliai.com/v1",
+      "key_url": "https://www.arliai.com/pricing",
+      "models": [
+        "Qwen3.5 27B Derestricted",
+        "Qwen3.5-27B-Derestricted"
+      ],
+      "example_model": "Qwen3.5-27B-Derestricted",
+      "openai_compatible": true,
+      "rate_limit": "1 request at a time; max 12K context tokens",
+      "daily_limit": "Limited trial uses per model (about 5 requests per 2 days, per third-party list)",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/arli-ai"
+    },
+    {
+      "slug": "bazaarlink",
+      "name": "BazaarLink",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://bazaarlink.ai/free",
+      "base_url": "https://api.bazaarlink.ai/v1",
+      "key_url": "https://bazaarlink.ai/free",
+      "models": [
+        "Qwen3.7 Flash",
+        "Reflection Beam (free)",
+        "Nemotron 3.5 Lightning (free)",
+        "DeepSeek V4 Flash 0731 (free)",
+        "qwen/qwen3.7-flash"
+      ],
+      "example_model": "qwen/qwen3.7-flash",
+      "openai_compatible": true,
+      "rate_limit": "10 RPM (20 RPM with any credit), 2 concurrent requests",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "60 weighted units/day (120 with credit), resets 00:00 UTC",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/bazaarlink"
+    },
+    {
+      "slug": "bytez",
+      "name": "Bytez",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://docs.bytez.com/model-api/docs/billing",
+      "base_url": "https://api.bytez.com/models/v2/openai/v1",
+      "key_url": "https://docs.bytez.com/model-api/docs/billing",
+      "models": [
+        "See provider",
+        "model-name"
+      ],
+      "example_model": "model-name",
+      "openai_compatible": true,
+      "rate_limit": "1 concurrent request (open models); 10 requests/second (closed models)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "$1 free credits, refreshed every 4 weeks",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/bytez"
+    },
+    {
+      "slug": "cerebras",
+      "name": "Cerebras",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://cerebras.ai/inference",
+      "base_url": "https://api.cerebras.ai/v1",
+      "key_url": "https://cerebras.ai/inference",
+      "models": [
+        "GPT OSS 120B",
+        "Qwen 3.8 27B",
+        "gpt-oss-120b"
+      ],
+      "example_model": "gpt-oss-120b",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "$5 after adding a verified payment method (expires after 30 days)",
+      "expiry": "30 days",
+      "code_examples": "code-examples/cerebras"
+    },
+    {
+      "slug": "cerebrium",
+      "name": "Cerebrium",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://www.cerebrium.ai/",
+      "base_url": "https://api.cortex.cerebrium.ai/v4",
+      "key_url": "https://www.cerebrium.ai/",
+      "models": [
+        "See provider"
+      ],
+      "example_model": "See provider",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "No sign-up credit shown on the pricing page (Hobby plan: free platform, compute billed per second)",
+      "expiry": "One-time",
+      "code_examples": "code-examples/cerebrium"
+    },
+    {
+      "slug": "cloudflare-workers-ai",
+      "name": "Cloudflare Workers AI",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://dash.cloudflare.com/",
+      "base_url": "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/",
+      "key_url": "https://dash.cloudflare.com/",
+      "models": [
+        "GLM-5.3 Flash",
+        "FLUX.2 Dev (image)",
+        "Whisper Large v3 Turbo",
+        "EuroLLM 9B"
+      ],
+      "example_model": "GLM-5.3 Flash",
+      "openai_compatible": false,
+      "rate_limit": "Varies by model",
+      "daily_limit": "10,000 neurons/day",
+      "monthly_limit": "~300,000 neurons/month",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/cloudflare-workers-ai"
+    },
+    {
+      "slug": "cohere",
+      "name": "Cohere",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://cohere.com/",
+      "base_url": "https://api.cohere.ai/v1",
+      "key_url": "https://cohere.com/",
+      "models": [
+        "Command A (111B)",
+        "Command A Translate",
+        "Command A Vision",
+        "North Mini Code",
+        "command-a-03-2025"
+      ],
+      "example_model": "command-a-03-2025",
+      "openai_compatible": true,
+      "rate_limit": "20 requests/minute",
+      "daily_limit": "1,000 API calls/month (trial key)",
+      "monthly_limit": "1,000 API calls/month (trial key, non-commercial)",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/cohere"
+    },
+    {
+      "slug": "dahl-inference",
+      "name": "Dahl Inference",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://inference.dahl.global/",
+      "base_url": "https://inference.dahl.global/v1",
+      "key_url": "https://inference.dahl.global/",
+      "models": [
+        "GLM-5.3 Flash",
+        "MiniMax M2.7",
+        "DeepSeek V4 Flash 0731",
+        "zai-org/GLM-5.3-Flash"
+      ],
+      "example_model": "zai-org/GLM-5.3-Flash",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "—",
+      "expiry": "—",
+      "code_examples": "code-examples/dahl-inference"
+    },
+    {
+      "slug": "experiential-labs",
+      "name": "Experiential Labs",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://www.experientiallabs.ai/pricing",
+      "base_url": "https://api.experientiallabs.ai/v1",
+      "key_url": "https://www.experientiallabs.ai/pricing",
+      "models": [
+        "GPT-6 Luna",
+        "DeepSeek V4.1 Flash 1017",
+        "Clef Flash (decision endpoint",
+        "free promo)",
+        "gpt-6-luna"
+      ],
+      "example_model": "gpt-6-luna",
+      "openai_compatible": true,
+      "rate_limit": "10 RPM and 250K TPM per free core model",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "1M input+output tokens/day shared across free core models, reset 00:00 UTC",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/experiential-labs"
+    },
+    {
+      "slug": "fireworks-ai",
+      "name": "Fireworks AI",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://fireworks.ai/",
+      "base_url": "https://api.fireworks.ai/inference/v1",
+      "key_url": "https://fireworks.ai/",
+      "models": [
+        "Nemotron 3.5 Lightning 30B A3B",
+        "MiniMax M3",
+        "GPT-OSS 120B",
+        "GLM 5.3 Flash",
+        "accounts/fireworks/models/nemotron-lightning-3p5-30b-a3b"
+      ],
+      "example_model": "accounts/fireworks/models/nemotron-lightning-3p5-30b-a3b",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "Free starter credit for new accounts (amount no longer stated by Fireworks; historically $1)",
+      "expiry": "One-time",
+      "code_examples": "code-examples/fireworks-ai"
+    },
+    {
+      "slug": "freeinference",
+      "name": "FreeInference",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://freeinference.org",
+      "base_url": "https://freeinference.org/v1",
+      "key_url": "https://freeinference.org",
+      "models": [
+        "GLM-5.3 Flash",
+        "DeepSeek V4 Flash",
+        "MiniMax M3",
+        "Qwen3.6 35B A3B",
+        "glm-5.3-flash"
+      ],
+      "example_model": "glm-5.3-flash",
+      "openai_compatible": true,
+      "rate_limit": "Not published (\"generous quota\"; HTTP 429 when rate-limited)",
+      "daily_limit": "No published daily cap",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/freeinference"
+    },
+    {
+      "slug": "friendli-ai",
+      "name": "Friendli AI",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://friendli.ai/",
+      "base_url": "https://inference.friendli.ai/v1",
+      "key_url": "https://friendli.ai/",
+      "models": [
+        "GLM-5.1",
+        "Gemma 4 31B",
+        "GLM 5.2",
+        "GLM 5.3 Flash",
+        "zai-org/GLM-5.1"
+      ],
+      "example_model": "zai-org/GLM-5.1",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "Trial credits at onboarding (amount not published)",
+      "expiry": "One-time",
+      "code_examples": "code-examples/friendli-ai"
+    },
+    {
+      "slug": "gonka-broker",
+      "name": "Gonka Broker",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://gonkabroker.com",
+      "base_url": "https://proxy.gonkabroker.com/v1",
+      "key_url": "https://gonkabroker.com",
+      "models": [
+        "GLM-5.3 Flash",
+        "DeepSeek V4 Flash 0731",
+        "MiniMax M2.7",
+        "zai-org/GLM-5.3-Flash"
+      ],
+      "example_model": "zai-org/GLM-5.3-Flash",
+      "openai_compatible": true,
+      "rate_limit": "Network limits (see docs.gonkabroker.com Limits & Quotas)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "Monthly free token grant after SMS verification (does not accumulate)",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/gonka-broker"
+    },
+    {
+      "slug": "gonkarouter",
+      "name": "GonkaRouter",
+      "categories": [
+        "trial"
+      ],
+      "card_required": false,
+      "provider_url": "https://gonkarouter.io",
+      "base_url": "https://api.gonkarouter.io/v1",
+      "key_url": "https://gonkarouter.io",
+      "models": [
+        "GLM-5.3 Flash",
+        "DeepSeek V4 Flash",
+        "MiniMax M2.7",
+        "zai-org/GLM-5.3-Flash"
+      ],
+      "example_model": "zai-org/GLM-5.3-Flash",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "1M free tokens for new users",
+      "expiry": "One-time",
+      "code_examples": "code-examples/gonkarouter"
+    },
+    {
+      "slug": "google-ai-studio",
+      "name": "Google AI Studio",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://aistudio.google.com/",
+      "base_url": "https://generativelanguage.googleapis.com/v1beta",
+      "key_url": "https://aistudio.google.com/",
+      "models": [
+        "Gemini 3.8 Flash",
+        "Gemma 4 26B A4B IT",
+        "Gemma 4 31B IT",
+        "Gemini 3 Flash Preview"
+      ],
+      "example_model": "Gemini 3.8 Flash",
+      "openai_compatible": false,
+      "rate_limit": "Varies by model (per-model limits are now shown only inside AI Studio)",
+      "daily_limit": "Varies by model. Free: Gemini 3.x Flash / Flash-Lite and Gemini 2.5 Pro/Flash (2.5 redirect to 3.x on Dec 1, 2026); Gemini 3.x Pro and Gemini 4 are paid",
+      "monthly_limit": "Free of charge",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/google-ai-studio"
+    },
+    {
+      "slug": "google-vertex-ai-express-mode",
+      "name": "Google Vertex AI express mode (Gemini Enterprise Agent Platform)",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/start/express-mode/overview",
+      "base_url": "https://aiplatform.googleapis.com/v1/publishers/google/models/MODEL_ID:generateContent",
+      "key_url": "https://docs.cloud.google.com/vertex-ai/generative-ai/docs/start/express-mode/overview",
+      "models": [
+        "Gemini 3.1 Pro Preview",
+        "Gemini 3 Flash Preview",
+        "Gemini 2.5 Pro",
+        "Gemini 2.5 Flash"
+      ],
+      "example_model": "Gemini 3.1 Pro Preview",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "Free-tier quota access, no billing account",
+      "expiry": "Up to 90 days for new Google Cloud users",
+      "code_examples": null
+    },
+    {
+      "slug": "grokified",
+      "name": "Grokified",
+      "categories": [
+        "trial"
+      ],
+      "card_required": false,
+      "provider_url": "https://grokified.com",
+      "base_url": "https://api.grokified.com/v1",
+      "key_url": "https://grokified.com",
+      "models": [
+        "Grok 4.7",
+        "grok-4.6",
+        "grok-4.3",
+        "grok-build-0.1",
+        "grok-4.7"
+      ],
+      "example_model": "grok-4.7",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "$5",
+      "expiry": "One-time",
+      "code_examples": "code-examples/grokified"
+    },
+    {
+      "slug": "groq-cloud",
+      "name": "Groq",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://console.groq.com/",
+      "base_url": "https://api.groq.com/openai/v1",
+      "key_url": "https://console.groq.com/",
+      "models": [
+        "GPT-OSS 120B",
+        "Qwen3.8 27B",
+        "Whisper Large v3",
+        "Whisper Large v3 Turbo",
+        "openai/gpt-oss-120b"
+      ],
+      "example_model": "openai/gpt-oss-120b",
+      "openai_compatible": true,
+      "rate_limit": "30 RPM; 8K TPM on most chat models (varies by model)",
+      "daily_limit": "1,000 requests/day and 200K tokens/day on gpt-oss / Qwen (varies by model)",
+      "monthly_limit": "Free Forever",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/groq-cloud"
+    },
+    {
+      "slug": "hetzner-inference",
+      "name": "Hetzner Inference API",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://experiments.hetzner.com/inference",
+      "base_url": "https://inference.hetzner.com/api/v1",
+      "key_url": "https://experiments.hetzner.com/inference",
+      "models": [
+        "Qwen3.8 27B",
+        "Qwen3.6 35B A3B",
+        "Qwen3.8-27B"
+      ],
+      "example_model": "Qwen3.8-27B",
+      "openai_compatible": true,
+      "rate_limit": "10 requests, 4M input / 100K output tokens per 60s (per API key)",
+      "daily_limit": "No daily cap published (free while the API is experimental); a Hetzner account with billing details is required and Hetzner may ask for a card or ID to verify it",
+      "monthly_limit": "Free during experimental phase, no billing system yet",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/hetzner-inference"
+    },
+    {
+      "slug": "hpc-ai",
+      "name": "HPC-AI Model APIs",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://www.hpc-ai.com/model-apis",
+      "base_url": "https://api.hpc-ai.com/inference/v1",
+      "key_url": "https://www.hpc-ai.com/model-apis",
+      "models": [
+        "Kimi K2.7 Code",
+        "moonshotai/kimi-k2.7-code"
+      ],
+      "example_model": "moonshotai/kimi-k2.7-code",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "$2 free voucher on signup ($4 with an invite code, per third-party list)",
+      "expiry": "One-time",
+      "code_examples": "code-examples/hpc-ai"
+    },
+    {
+      "slug": "hyperbolic",
+      "name": "Hyperbolic",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://app.hyperbolic.xyz/",
+      "base_url": "https://api.hyperbolic.ai/inference/v1",
+      "key_url": "https://app.hyperbolic.xyz/",
+      "models": [
+        "DeepSeek V4 Flash 0731",
+        "Qwen3.8 27B",
+        "MiMo V2.6 Flash",
+        "GLM-5.3 Flash",
+        "deepseek-v4-flash-0731"
+      ],
+      "example_model": "deepseek-v4-flash-0731",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "$1 after phone verification (Free Tier)",
+      "expiry": "One-time",
+      "code_examples": "code-examples/hyperbolic"
+    },
+    {
+      "slug": "ibm-watsonx",
+      "name": "IBM watsonx.ai (Lite plan)",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://www.ibm.com/products/watsonx-ai/pricing",
+      "base_url": "https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2025-02-11",
+      "key_url": "https://www.ibm.com/products/watsonx-ai/pricing",
+      "models": [
+        "Granite 4 H Small",
+        "Llama 3.3 70B Instruct",
+        "Llama 4 Maverick",
+        "GPT-OSS 120B"
+      ],
+      "example_model": "Granite 4 H Small",
+      "openai_compatible": true,
+      "rate_limit": "About 2 requests/second (Lite)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "300,000 tokens/month + 20 CUH/month",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/ibm-watsonx"
+    },
+    {
+      "slug": "iflytek-spark",
+      "name": "iFlytek Spark Lite",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://www.xfyun.cn/doc/spark/HTTP调用文档.html",
+      "base_url": "https://spark-api-open.xf-yun.com/v1",
+      "key_url": "https://www.xfyun.cn/doc/spark/HTTP调用文档.html",
+      "models": [
+        "Spark Lite",
+        "lite"
+      ],
+      "example_model": "lite",
+      "openai_compatible": true,
+      "rate_limit": "Not published on the HTTP doc",
+      "daily_limit": "Not published (Lite is free)",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/iflytek-spark"
+    },
+    {
+      "slug": "inception-labs",
+      "name": "Inception Labs",
+      "categories": [
+        "trial"
+      ],
+      "card_required": false,
+      "provider_url": "https://www.inceptionlabs.ai/",
+      "base_url": "https://api.inceptionlabs.ai/v1",
+      "key_url": "https://www.inceptionlabs.ai/",
+      "models": [
+        "Mercury 3",
+        "Mercury 2.5",
+        "Mercury 2",
+        "mercury-3"
+      ],
+      "example_model": "mercury-3",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "100M tokens",
+      "expiry": "One-time (new accounts)",
+      "code_examples": "code-examples/inception-labs"
+    },
+    {
+      "slug": "inferbase",
+      "name": "Inferbase",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": false,
+      "provider_url": "https://inferbase.ai",
+      "base_url": "https://api.inferbase.ai/v1",
+      "key_url": "https://inferbase.ai",
+      "models": [
+        "GPT-OSS 120B",
+        "DeepSeek V4 Flash",
+        "Qwen3.6 27B",
+        "Gemma 4 31B IT",
+        "openai-gpt-oss-120b"
+      ],
+      "example_model": "openai-gpt-oss-120b",
+      "openai_compatible": true,
+      "rate_limit": "100 managed requests per day",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "$0.50 of managed model usage per day; 5,000 requests per month",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/inferbase"
+    },
+    {
+      "slug": "iteracompute",
+      "name": "IteraCompute",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://iteracompute.com/free/",
+      "base_url": "https://api.iteracompute.com/v1",
+      "key_url": "https://iteracompute.com/free/",
+      "models": [
+        "Qwen3.8 27B",
+        "qwen/qwen3.8-27b"
+      ],
+      "example_model": "qwen/qwen3.8-27b",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "30M tokens/month on Qwen3.8-27B (promotion, no card)",
+      "expiry": "Until Nov 24, 2026 00:00 PT",
+      "code_examples": "code-examples/iteracompute"
+    },
+    {
+      "slug": "jina-ai",
+      "name": "Jina AI (Embeddings / Reader API)",
+      "categories": [
+        "trial"
+      ],
+      "card_required": false,
+      "provider_url": "https://jina.ai/embeddings/",
+      "base_url": "https://api.jina.ai/v1/embeddings",
+      "key_url": "https://jina.ai/embeddings/",
+      "models": [
+        "Jina Embeddings v5 Text Small",
+        "Jina Embeddings v5 Text Nano",
+        "Jina Embeddings v5 Omni Small",
+        "Jina Embeddings v3"
+      ],
+      "example_model": "Jina Embeddings v5 Text Small",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "Free tokens on an auto-generated key (amount not stated on page)",
+      "expiry": "Keys do not expire",
+      "code_examples": "code-examples/jina-ai"
+    },
+    {
+      "slug": "kilo-ai-gateway",
+      "name": "Kilo AI Gateway",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://kilo.ai/gateway",
+      "base_url": "https://ai-gateway.kilo.ai/api/v1",
+      "key_url": "https://kilo.ai/gateway",
+      "models": [
+        "Nemotron 3.5 Lightning",
+        "Nemotron 3 Nano Omni Reasoning",
+        "Dots3-Note Preview",
+        "Reflection Beam 1.0"
+      ],
+      "example_model": "Nemotron 3.5 Lightning",
+      "openai_compatible": true,
+      "rate_limit": "200 requests/hour per IP on free models (anonymous use allowed)",
+      "daily_limit": "Default free models only",
+      "monthly_limit": "Free plan, no expiry",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": null
+    },
+    {
+      "slug": "kiosapi",
+      "name": "Kiosapi.id",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://kiosapi.id/pricing",
+      "base_url": "https://api.kiosapi.id/v1",
+      "key_url": "https://kiosapi.id/pricing",
+      "models": [
+        "GLM 4.7 Flash",
+        "Qwen3 30B",
+        "Gemma 4 26B",
+        "Llama 3.1 8B",
+        "zai/glm-4.7-flash"
+      ],
+      "example_model": "zai/glm-4.7-flash",
+      "openai_compatible": true,
+      "rate_limit": "5 requests/minute (free models)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "50 requests/day per account shared across free models, reset 07:00 WIB",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/kiosapi"
+    },
+    {
+      "slug": "llm-kiwi",
+      "name": "LLM.kiwi",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://llm.kiwi/pricing",
+      "base_url": "https://api.llm.kiwi/v1",
+      "key_url": "https://llm.kiwi/pricing",
+      "models": [
+        "Auto router",
+        "MiniMax M3",
+        "Nemotron 3 Ultra",
+        "Nemotron 3 Super",
+        "auto"
+      ],
+      "example_model": "auto",
+      "openai_compatible": true,
+      "rate_limit": "Baseline rate limits (figures not published)",
+      "daily_limit": "Not published",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/llm-kiwi"
+    },
+    {
+      "slug": "llm7-io",
+      "name": "LLM7.io",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://llm7.io",
+      "base_url": "https://api.llm7.io/v1",
+      "key_url": "https://llm7.io",
+      "models": [
+        "Nemotron 3 Nano 30B",
+        "GLM 5.3 Flash",
+        "Mistral Nemo Instruct 2407",
+        "Codestral Latest",
+        "nemotron-3-nano:30b"
+      ],
+      "example_model": "nemotron-3-nano:30b",
+      "openai_compatible": true,
+      "rate_limit": "1 req/s, 60/min, 250/hour (free token from dash.llm7.io)",
+      "daily_limit": "100,000 tokens per 24h (free token; may be reduced without notice)",
+      "monthly_limit": "Free, no billing",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/llm7-io"
+    },
+    {
+      "slug": "llmtr",
+      "name": "LLMTR",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://llmtr.com/en/terms",
+      "base_url": "https://llmtr.com/v1",
+      "key_url": "https://llmtr.com/en/terms",
+      "models": [
+        "Nemotron 3 Ultra 550B",
+        "Nemotron 3.5 Super VL (free)",
+        "Qwen3.8 27B (free)",
+        "Agnes 3.0 Flash",
+        "nvidia/nemotron-3-ultra-550b-a55b"
+      ],
+      "example_model": "nvidia/nemotron-3-ultra-550b-a55b",
+      "openai_compatible": true,
+      "rate_limit": "Not published; lower allowance in an account's first 24h",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "Per-model daily allowance (e.g. 200K tokens/day on dated previews)",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/llmtr"
+    },
+    {
+      "slug": "meganova",
+      "name": "MegaNova AI",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": false,
+      "provider_url": "https://docs.meganova.ai/tiers",
+      "base_url": "https://api.meganova.ai/v1",
+      "key_url": "https://docs.meganova.ai/tiers",
+      "models": [
+        "Manta Pro 1.0",
+        "Manta Flash 1.0",
+        "Manta Mini 1.0",
+        "Mistral Small 3.2 24B",
+        "meganova-ai/manta-pro-1.0"
+      ],
+      "example_model": "meganova-ai/manta-pro-1.0",
+      "openai_compatible": true,
+      "rate_limit": "Tier 1 (free): 20-200 RPM",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "Tier 1: 50-500 free-model requests/day (varies by model)",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/meganova"
+    },
+    {
+      "slug": "mistral",
+      "name": "Mistral (La Plateforme)",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://console.mistral.ai/",
+      "base_url": "https://api.mistral.ai/v1",
+      "key_url": "https://console.mistral.ai/",
+      "models": [
+        "Mistral Small",
+        "Mistral Large 4 (Preview)",
+        "Codestral 2508",
+        "Ministral 3 8B"
+      ],
+      "example_model": "Mistral Small",
+      "openai_compatible": true,
+      "rate_limit": "1 request/second",
+      "daily_limit": "-",
+      "monthly_limit": "Free",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": null
+    },
+    {
+      "slug": "mixlayer",
+      "name": "Mixlayer",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://docs.mixlayer.com/credits-and-limits",
+      "base_url": "https://models.mixlayer.ai/v1",
+      "key_url": "https://docs.mixlayer.com/credits-and-limits",
+      "models": [
+        "Qwen3.5 4B (free)",
+        "qwen/qwen3.5-4b-free"
+      ],
+      "example_model": "qwen/qwen3.5-4b-free",
+      "openai_compatible": true,
+      "rate_limit": "Per-organization, per-model RPM/TPM (values shown in console only)",
+      "daily_limit": "Not published",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/mixlayer"
+    },
+    {
+      "slug": "moark",
+      "name": "Moark (Gitee AI)",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://moark.com/docs/FAQ",
+      "base_url": "https://api.moark.com/v1",
+      "key_url": "https://moark.com/docs/FAQ",
+      "models": [
+        "DeepSeek V4 Flash 0731",
+        "GLM 5.3 Flash",
+        "Qwen3.8 27B",
+        "deepseek-v4-flash-0731"
+      ],
+      "example_model": "deepseek-v4-flash-0731",
+      "openai_compatible": true,
+      "rate_limit": "Not published",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "100 free calls/day per user (free experience access token)",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/moark"
+    },
+    {
+      "slug": "modelscope",
+      "name": "ModelScope",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://modelscope.cn",
+      "base_url": "https://api-inference.modelscope.cn/v1",
+      "key_url": "https://modelscope.cn",
+      "models": [
+        "Qwen3.8 27B",
+        "Nex N2.5 Pro",
+        "LongCat Flash Lite",
+        "ERNIE 4.5 300B A47B",
+        "Qwen/Qwen3.8-27B"
+      ],
+      "example_model": "Qwen/Qwen3.8-27B",
+      "openai_compatible": true,
+      "rate_limit": "500 requests/day per model",
+      "daily_limit": "2,000 requests/day total",
+      "monthly_limit": "Free, no billing",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/modelscope"
+    },
+    {
+      "slug": "nous-portal",
+      "name": "Nous Portal",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://portal.nousresearch.com",
+      "base_url": "https://inference-api.nousresearch.com/v1",
+      "key_url": "https://portal.nousresearch.com",
+      "models": [
+        "StepFun Step 3.7 Flash",
+        "Reflection Beam 1.0",
+        "Upstage Solar Mini 4",
+        "Crouton Alpha (stealth",
+        "free)",
+        "model-name-here"
+      ],
+      "example_model": "model-name-here",
+      "openai_compatible": true,
+      "rate_limit": "Standard rate limits (figures not published)",
+      "daily_limit": "Free models only (no monthly credit)",
+      "monthly_limit": "Free tier: $0/month. A GitHub user reported (14 Sep 2026) that a payment method (Stripe, $0 charge) is required to get a key - verify",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/nous-portal"
+    },
+    {
+      "slug": "novai",
+      "name": "NovAI",
+      "categories": [
+        "trial"
+      ],
+      "card_required": false,
+      "provider_url": "https://aiapi-pro.com",
+      "base_url": "https://aiapi-pro.com/v1",
+      "key_url": "https://aiapi-pro.com",
+      "models": [
+        "GLM-4.7 Flash",
+        "GLM-4.6V Flash",
+        "GLM-4.1V Thinking Flash",
+        "glm-4.7-flash"
+      ],
+      "example_model": "glm-4.7-flash",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "$2 welcome credit, no card",
+      "expiry": "One-time",
+      "code_examples": "code-examples/novai"
+    },
+    {
+      "slug": "novita-ai",
+      "name": "Novita AI",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://novita.ai/",
+      "base_url": "https://api.novita.ai/v3/openai",
+      "key_url": "https://novita.ai/",
+      "models": [
+        "GLM 5.3",
+        "Kimi K3",
+        "DeepSeek V4.1 Flash",
+        "Qwen3.8 27B",
+        "zai-org/glm-5.3"
+      ],
+      "example_model": "zai-org/glm-5.3",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "No automatic sign-up credit; $10 per referral (both sides)",
+      "expiry": "One-time",
+      "code_examples": "code-examples/novita-ai"
+    },
+    {
+      "slug": "nvidia-nim",
+      "name": "NVIDIA NIM",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://build.nvidia.com/explore/discover",
+      "base_url": "https://integrate.api.nvidia.com/v1",
+      "key_url": "https://build.nvidia.com/explore/discover",
+      "models": [
+        "GLM-5.3 Flash",
+        "DiffusionGemma 26B A4B",
+        "Riva Translate 4B v2",
+        "Cosmos Reason 2 8B",
+        "z-ai/glm-5.3-flash"
+      ],
+      "example_model": "z-ai/glm-5.3-flash",
+      "openai_compatible": true,
+      "rate_limit": "~40 RPM (varies per model, not published)",
+      "daily_limit": "-",
+      "monthly_limit": "-",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/nvidia-nim"
+    },
+    {
+      "slug": "ollama-cloud",
+      "name": "Ollama Cloud",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://ollama.com/cloud",
+      "base_url": "https://ollama.com/v1",
+      "key_url": "https://ollama.com/cloud",
+      "models": [
+        "Reflection Beam (501B)",
+        "model-name-here"
+      ],
+      "example_model": "model-name-here",
+      "openai_compatible": true,
+      "rate_limit": "Pay-as-you-go: 3 concurrent requests; only Beam (beam:cloud) is labelled free",
+      "daily_limit": "No free monthly allowance any more (starter credits removed); other cloud models are billed per token",
+      "monthly_limit": "Weekly usage limit resets every 7 days",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/ollama-cloud"
+    },
+    {
+      "slug": "openrouter",
+      "name": "OpenRouter",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": false,
+      "provider_url": "https://openrouter.ai/",
+      "base_url": "https://openrouter.ai/api/v1",
+      "key_url": "https://openrouter.ai/",
+      "models": [
+        "Gemma 4 31B IT",
+        "NVIDIA Nemotron 3 Ultra",
+        "Recursive Flint v1.0 (free)",
+        "Nemotron 3.5 Super VL",
+        "google/gemma-4-31b-it:free"
+      ],
+      "example_model": "google/gemma-4-31b-it:free",
+      "openai_compatible": true,
+      "rate_limit": "20 requests/minute",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "50 requests/day (up to 1000 with $10 topup)",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/openrouter"
+    },
+    {
+      "slug": "opentyphoon",
+      "name": "OpenTyphoon (Typhoon API)",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://opentyphoon.ai",
+      "base_url": "https://api.opentyphoon.ai/v1",
+      "key_url": "https://opentyphoon.ai",
+      "models": [
+        "Typhoon 2.5 30B A3B Instruct",
+        "Typhoon OCR 1.5",
+        "typhoon-v2.5-30b-a3b-instruct"
+      ],
+      "example_model": "typhoon-v2.5-30b-a3b-instruct",
+      "openai_compatible": true,
+      "rate_limit": "5 requests/second, 200 RPM (text models); 20 RPM for OCR",
+      "daily_limit": "No daily cap published",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/opentyphoon"
+    },
+    {
+      "slug": "ovh-ai",
+      "name": "OVH AI Endpoints",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://endpoints.ai.cloud.ovh.net/",
+      "base_url": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1",
+      "key_url": "https://endpoints.ai.cloud.ovh.net/",
+      "models": [
+        "GPT OSS 120B",
+        "BGE-M3 (embeddings)",
+        "Whisper Large v3 Turbo",
+        "Qwen2.5 VL 72B Instruct",
+        "gpt-oss-120b"
+      ],
+      "example_model": "gpt-oss-120b",
+      "openai_compatible": true,
+      "rate_limit": "2 RPM per IP per model (anonymous, free); 400 RPM with a key (pay-as-you-go)",
+      "daily_limit": "Unspecified",
+      "monthly_limit": "Beta Access",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/ovh-ai"
+    },
+    {
+      "slug": "pollinations-ai",
+      "name": "Pollinations.ai",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": false,
+      "provider_url": "https://pollinations.ai",
+      "base_url": "https://gen.pollinations.ai/v1",
+      "key_url": "https://pollinations.ai",
+      "models": [
+        "GPT-OSS 20B",
+        "Mistral Large 3",
+        "Kimi K2.6",
+        "GLM 5.3 Flash",
+        "openai/gpt-oss-20b"
+      ],
+      "example_model": "openai/gpt-oss-20b",
+      "openai_compatible": true,
+      "rate_limit": "API key required (anonymous access removed); no card",
+      "daily_limit": "Free usage paid from Quest Pollen earned in the dashboard",
+      "monthly_limit": "Free, no billing system",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/pollinations-ai"
+    },
+    {
+      "slug": "qwen-alibaba",
+      "name": "Qwen (Alibaba)",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://bailian.console.alibabacloud.com/",
+      "base_url": "https://dashscope-intl.aliyuncs.com/api/v1",
+      "key_url": "https://bailian.console.alibabacloud.com/",
+      "models": [
+        "Qwen3.8 Flash",
+        "Qwen3.7 Plus",
+        "Qwen3.8 Max",
+        "Qwen3.7 Max",
+        "qwen3.8-flash"
+      ],
+      "example_model": "qwen3.8-flash",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "~1M tokens per model, 90 days (Singapore; newer models only since Oct 29, 2026)",
+      "expiry": "One-time per model",
+      "code_examples": "code-examples/qwen-alibaba"
+    },
+    {
+      "slug": "regolo-ai",
+      "name": "Regolo.ai",
+      "categories": [
+        "trial"
+      ],
+      "card_required": false,
+      "provider_url": "https://regolo.ai",
+      "base_url": "https://api.regolo.ai/v1",
+      "key_url": "https://regolo.ai",
+      "models": [
+        "GPT-OSS 120B",
+        "Qwen3.8 27B",
+        "Gemma 4 31B",
+        "GLM-5.2",
+        "gpt-oss-120b"
+      ],
+      "example_model": "gpt-oss-120b",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "30-day trial, 1M tokens/day, no card",
+      "expiry": "30 days",
+      "code_examples": "code-examples/regolo-ai"
+    },
+    {
+      "slug": "replicate",
+      "name": "Replicate",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://replicate.com/",
+      "base_url": "https://api.replicate.com/v1",
+      "key_url": "https://replicate.com/",
+      "models": [
+        "See provider"
+      ],
+      "example_model": "See provider",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "Limited free runs on select models",
+      "expiry": "One-time",
+      "code_examples": "code-examples/replicate"
+    },
+    {
+      "slug": "requesty",
+      "name": "Requesty",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": false,
+      "provider_url": "https://requesty.ai/",
+      "base_url": "https://router.requesty.ai/v1",
+      "key_url": "https://requesty.ai/",
+      "models": [
+        "Gemma 4 31B IT",
+        "Ling 3.0 Tiny",
+        "Nemotron 3 Nano Omni Reasoning",
+        "Nemotron 3 Nano 30B A3B",
+        "google/gemma-4-31b-it"
+      ],
+      "example_model": "google/gemma-4-31b-it",
+      "openai_compatible": true,
+      "rate_limit": "20 RPM on free models (60 RPM for paying orgs)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "200 requests/day (new orgs) / 1,000/day (paying orgs), shared across free models",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/requesty"
+    },
+    {
+      "slug": "routeway",
+      "name": "Routeway",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://routeway.ai/",
+      "base_url": "https://api.routeway.ai/v1",
+      "key_url": "https://routeway.ai/",
+      "models": [
+        "DeepSeek V4.1 Flash (free)",
+        "MiniMax M3.1 Flash (free)",
+        "Muse Glimmer 30B",
+        "deepseek-v4.1-flash:free"
+      ],
+      "example_model": "deepseek-v4.1-flash:free",
+      "openai_compatible": true,
+      "rate_limit": "5 RPM on :free models",
+      "daily_limit": "200 requests/day",
+      "monthly_limit": "Starter plan free, shared queue",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/routeway"
+    },
+    {
+      "slug": "sail-research",
+      "name": "Sail Research",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://docs.sailresearch.com/pricing",
+      "base_url": "https://api.sailresearch.com/v1",
+      "key_url": "https://docs.sailresearch.com/pricing",
+      "models": [
+        "Kimi K3",
+        "GLM 5.3",
+        "GLM 5.3 Flash",
+        "DeepSeek V4.1 Flash 1017",
+        "moonshotai/Kimi-K3"
+      ],
+      "example_model": "moonshotai/Kimi-K3",
+      "openai_compatible": true,
+      "rate_limit": "Not published for Free plan (most relaxed on flex window)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "$5 free credits every month (payment method attached)",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/sail-research"
+    },
+    {
+      "slug": "sarvam-ai",
+      "name": "Sarvam AI",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://www.sarvam.ai/api-pricing",
+      "base_url": "https://api.sarvam.ai/v1",
+      "key_url": "https://www.sarvam.ai/api-pricing",
+      "models": [
+        "Sarvam 105B",
+        "Sarvam 105B Conversations",
+        "sarvam-105b"
+      ],
+      "example_model": "sarvam-105b",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "INR 100 free credits on signup",
+      "expiry": "One-time; credits do not expire (per third-party list)",
+      "code_examples": "code-examples/sarvam-ai"
+    },
+    {
+      "slug": "scaleway",
+      "name": "Scaleway Generative APIs",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://console.scaleway.com/generative-api/models",
+      "base_url": "https://api.scaleway.ai/v1",
+      "key_url": "https://console.scaleway.com/generative-api/models",
+      "models": [
+        "GPT-OSS 120B",
+        "Whisper Large v3",
+        "Voxtral Small 24B",
+        "Holo2 30B A3B",
+        "gpt-oss-120b"
+      ],
+      "example_model": "gpt-oss-120b",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "1M tokens (+60 min audio transcription), all serverless models",
+      "expiry": "One-time",
+      "code_examples": "code-examples/scaleway"
+    },
+    {
+      "slug": "sea-lion",
+      "name": "SEA-LION API",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://docs.sea-lion.ai/guides/inferencing/api",
+      "base_url": "https://api.sea-lion.ai/v1",
+      "key_url": "https://docs.sea-lion.ai/guides/inferencing/api",
+      "models": [
+        "Qwen SEA-LION v4.5 27B Instruct",
+        "Llama SEA-LION v3.5 70B Reasoning",
+        "SEA-Guard (safety)",
+        "SEA-LION Embedding 600M",
+        "aisingapore/Qwen-SEA-LION-v4.5-27B-IT"
+      ],
+      "example_model": "aisingapore/Qwen-SEA-LION-v4.5-27B-IT",
+      "openai_compatible": true,
+      "rate_limit": "10 requests/minute per user (increase on request: sealion@aisingapore.org)",
+      "daily_limit": "Not published",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/sea-lion"
+    },
+    {
+      "slug": "sensenova",
+      "name": "SenseNova (SenseTime)",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://www.sensenova.cn/token-plan",
+      "base_url": "https://token.sensenova.cn/v1",
+      "key_url": "https://www.sensenova.cn/token-plan",
+      "models": [
+        "SenseNova 6.8 Flash Lite",
+        "sensenova-6.8-flash-lite"
+      ],
+      "example_model": "sensenova-6.8-flash-lite",
+      "openai_compatible": true,
+      "rate_limit": "Not published",
+      "daily_limit": "Not published (\\\"限时放量\\\" during public beta)",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/sensenova"
+    },
+    {
+      "slug": "siliconflow",
+      "name": "SiliconFlow",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://cloud.siliconflow.cn/models",
+      "base_url": "https://api.siliconflow.cn/v1",
+      "key_url": "https://cloud.siliconflow.cn/models",
+      "models": [
+        "GLM-Z1 9B",
+        "Qwen2.5 7B Instruct",
+        "Xing4.0 29B A4B",
+        "GLM-4 9B 0414",
+        "THUDM/GLM-Z1-9B-0414"
+      ],
+      "example_model": "THUDM/GLM-Z1-9B-0414",
+      "openai_compatible": true,
+      "rate_limit": "Fixed limits for free models — exact figures require login, verify on cloud.siliconflow.cn/models",
+      "daily_limit": "Not fully published — verify on docs.siliconflow.cn",
+      "monthly_limit": "Free models available after identity verification",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/siliconflow"
+    },
+    {
+      "slug": "simplellm",
+      "name": "SimpleLLM",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://simplellm.eu/docs/",
+      "base_url": "https://api.simplellm.eu/v1",
+      "key_url": "https://simplellm.eu/docs/",
+      "models": [
+        "Llama 3.1 8B Free",
+        "Gemma E4B Free",
+        "Mistral 7B (tier free",
+        "$0)",
+        "Kode 14B (tier free",
+        "$0)",
+        "free-Llama-3.1-8B-Instruct"
+      ],
+      "example_model": "free-Llama-3.1-8B-Instruct",
+      "openai_compatible": true,
+      "rate_limit": "Account-specific (read via GET /v1/rate-limit)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "Free-model hourly/daily request and token allowances (values per account, not published)",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/simplellm"
+    },
+    {
+      "slug": "tencent-cloud-tokenhub",
+      "name": "Tencent Cloud TokenHub",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://www.tencentcloud.com/act/pro/tokenhub",
+      "base_url": "https://tokenhub-intl.tencentmaas.com/v1",
+      "key_url": "https://www.tencentcloud.com/act/pro/tokenhub",
+      "models": [
+        "See provider"
+      ],
+      "example_model": "See provider",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "1M free tokens per language model, once per account per model",
+      "expiry": "90 days after claim (intl promo page; docs say 1 year); campaign ends 2026-12-31\" - DeepSeek-V4-Pro",
+      "code_examples": null
+    },
+    {
+      "slug": "token-harbor",
+      "name": "Token Harbor",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://tokenharbor.ai",
+      "base_url": "https://tokenharbor.ai/v1",
+      "key_url": "https://tokenharbor.ai",
+      "models": [
+        "DeepSeek V4.1 Flash",
+        "MiMo V2.6 Flash",
+        "TH-Rudder",
+        "deepseek-v4.1-flash:free"
+      ],
+      "example_model": "deepseek-v4.1-flash:free",
+      "openai_compatible": true,
+      "rate_limit": "60 requests/min and 1,800/hour per account (100/min, 3,000/hour per IP)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "Free allowance, resets on a rolling 7-day period",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/token-harbor"
+    },
+    {
+      "slug": "upstage",
+      "name": "Upstage",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://console.upstage.ai/",
+      "base_url": "https://api.upstage.ai/v1/solar",
+      "key_url": "https://console.upstage.ai/",
+      "models": [
+        "See provider",
+        "solar-pro4"
+      ],
+      "example_model": "solar-pro4",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "$10 sign-up credit (announced by Upstage; not shown on the pricing page, verify)",
+      "expiry": "3 months",
+      "code_examples": "code-examples/upstage"
+    },
+    {
+      "slug": "vectoree",
+      "name": "Vectoree",
+      "categories": [
+        "trial"
+      ],
+      "card_required": false,
+      "provider_url": "https://vectoree.ai",
+      "base_url": "https://vectoree.ai/api/v1",
+      "key_url": "https://vectoree.ai",
+      "models": [
+        "Vectoree Auto (router)",
+        "vectoree/auto"
+      ],
+      "example_model": "vectoree/auto",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "$5 welcome credit after CLI login",
+      "expiry": "One-time",
+      "code_examples": "code-examples/vectoree"
+    },
+    {
+      "slug": "vercel-ai-gateway",
+      "name": "Vercel AI Gateway",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://vercel.com/ai-gateway",
+      "base_url": "https://ai-gateway.vercel.sh/v1",
+      "key_url": "https://vercel.com/ai-gateway",
+      "models": [
+        "Nemotron 3.5 Lightning (free)",
+        "Llama 3.3 70B",
+        "MiniMax M3.1 Flash",
+        "GLM-4.7 Flash",
+        "nvidia/nemotron-3.5-lightning-free"
+      ],
+      "example_model": "nvidia/nemotron-3.5-lightning-free",
+      "openai_compatible": true,
+      "rate_limit": "Lower per-model limits than the paid tier (429 on excess)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "$5/month",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/vercel-ai-gateway"
+    },
+    {
+      "slug": "vlm-run",
+      "name": "VLM Run Gateway",
+      "categories": [
+        "trial"
+      ],
+      "card_required": false,
+      "provider_url": "https://docs.vlm.run/gateway/rate-limits",
+      "base_url": "https://gateway.vlm.run/v1/openai",
+      "key_url": "https://docs.vlm.run/gateway/rate-limits",
+      "models": [
+        "Qwen3.8 27B",
+        "Gemma 4 26B A4B IT",
+        "Qwen3.5 0.8B",
+        "DiffusionGemma 26B A4B",
+        "qwen/qwen3.8-27b"
+      ],
+      "example_model": "qwen/qwen3.8-27b",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "100 free credits on sign-up (~$1, at $0.01/credit)",
+      "expiry": "One-time, then pay-as-you-go",
+      "code_examples": "code-examples/vlm-run"
+    },
+    {
+      "slug": "voyage-ai",
+      "name": "Voyage AI (embeddings & rerankers)",
+      "categories": [
+        "trial"
+      ],
+      "card_required": true,
+      "provider_url": "https://docs.voyageai.com/docs/pricing",
+      "base_url": "https://api.voyageai.com/v1/embeddings",
+      "key_url": "https://docs.voyageai.com/docs/pricing",
+      "models": [
+        "Voyage 4 Large",
+        "Voyage 4",
+        "Voyage 4 Lite",
+        "Voyage Code 3"
+      ],
+      "example_model": "Voyage 4 Large",
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": "First 200M tokens free per model (voyage-4 family, rerank-2.5); 50M on domain models",
+      "expiry": "One-time per account per model",
+      "code_examples": "code-examples/voyage-ai"
+    },
+    {
+      "slug": "z-ai",
+      "name": "Z.AI (GLM)",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://z.ai/",
+      "base_url": "https://api.z.ai/api/paas/v4",
+      "key_url": "https://z.ai/",
+      "models": [
+        "GLM-4.6V-Flash (vision)",
+        "GLM-4.5-Flash",
+        "GLM-4.7-Flash",
+        "glm-4.6v-flash"
+      ],
+      "example_model": "glm-4.6v-flash",
+      "openai_compatible": true,
+      "rate_limit": "~1 request/second (Flash models)",
+      "daily_limit": "~1,000 requests/day (Flash tier)",
+      "monthly_limit": "Free tier ongoing, subject to change",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/z-ai"
+    },
+    {
+      "slug": "zhipu-bigmodel",
+      "name": "Zhipu BigModel (China)",
+      "categories": [
+        "permanent"
+      ],
+      "card_required": true,
+      "provider_url": "https://docs.bigmodel.cn/cn/guide/start/model-overview",
+      "base_url": "https://open.bigmodel.cn/api/paas/v4",
+      "key_url": "https://docs.bigmodel.cn/cn/guide/start/model-overview",
+      "models": [
+        "GLM-4.7-Flash",
+        "GLM-4.5-Flash",
+        "GLM-4-Flash-250414",
+        "GLM-4.6V-Flash (vision)",
+        "glm-4.7-flash"
+      ],
+      "example_model": "glm-4.7-flash",
+      "openai_compatible": true,
+      "rate_limit": "Low concurrency on free Flash models (GLM-4.7-Flash reported at 1 concurrent request)",
+      "daily_limit": "Not published",
+      "monthly_limit": "—",
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/zhipu-bigmodel"
+    },
+    {
+      "slug": "zro",
+      "name": "Zro (MoonMath)",
+      "categories": [
+        "renewable"
+      ],
+      "card_required": true,
+      "provider_url": "https://zro.moonmath.ai",
+      "base_url": "https://zro.moonmath.ai/v1",
+      "key_url": "https://zro.moonmath.ai",
+      "models": [
+        "GLM-5.3 Flash",
+        "DeepSeek V4.1 Flash",
+        "glm-5.3-flash"
+      ],
+      "example_model": "glm-5.3-flash",
+      "openai_compatible": true,
+      "rate_limit": "Daily usage allowance (amount not published)",
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": "Resets every day (Flash models only)",
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": "code-examples/zro"
+    },
+    {
+      "slug": "provider",
+      "name": "Provider",
+      "categories": [],
+      "card_required": null,
+      "provider_url": "",
+      "base_url": "Base URL",
+      "key_url": "",
+      "models": [],
+      "example_model": null,
+      "openai_compatible": true,
+      "rate_limit": null,
+      "daily_limit": null,
+      "monthly_limit": null,
+      "free_offer": null,
+      "credit_amount": null,
+      "expiry": null,
+      "code_examples": null
+    }
+  ]
+}
