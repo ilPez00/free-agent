@@ -147,9 +147,7 @@ def check_provider(p: dict, model: str | None = None,
     if not p["openai_compatible"]:
         return 2, "not OpenAI-compatible; no automatic probe", ""
     resolved = resolve_key(p, key_env)
-    if not resolved:
-        return 78, "no key in environment or ~/.env", ""
-    source, key = resolved
+    source, key = resolved if resolved else ("", "")
     model = model or p["example_model"]
     if not model:
         return 2, "no model known; pass one explicitly", source
@@ -159,12 +157,14 @@ def check_provider(p: dict, model: str | None = None,
         "messages": [{"role": "user", "content": "Reply with exactly: FREE_LLM_OK"}],
         "max_tokens": 256,
     })
+    headers = ["-H", "Content-Type: application/json"]
+    if key:
+        headers += ["-H", f"Authorization: Bearer {key}"]
     try:
         proc = subprocess.run(
-            ["curl", "-sS", "-m", str(timeout), "-w", "\n%{http_code}", url,
-             "-H", "Content-Type: application/json",
-             "-H", f"Authorization: Bearer {key}",
-             "-d", body],
+            ["curl", "-sS", "-m", str(timeout), "-w", "\n%{http_code}", url]
+            + headers
+            + ["-d", body],
             capture_output=True, text=True, timeout=timeout + 10,
         )
     except (OSError, subprocess.SubprocessError) as exc:
