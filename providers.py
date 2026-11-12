@@ -273,6 +273,9 @@ def _child_env(tmp: str, key: str) -> dict:
 
 def _spawn(cmd, cwd, timeout, env):
     timeout = max(0.05, min(float(timeout), 3600))
+    # PWD is deliberately absent from this minimal allowlist: a missing PWD makes
+    # a CLI fall back to getcwd(), and `cwd=` is correct. Only a *stale* PWD (see
+    # free_agent.run_cmd) sends it to the wrong directory.
     try:
         proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdin=subprocess.DEVNULL,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,

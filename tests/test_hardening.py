@@ -121,4 +121,15 @@ class ProviderConfigDiagnostics(unittest.TestCase):
         self.assertIn('32-character', str(ctx.exception))
 
 
+class OtherSpawnPathsSetPwd(unittest.TestCase):
+    def test_workflows_exec_sets_pwd(self):
+        with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as root:
+            rc, out, err, timed_out = workflows._exec(
+                [sys.executable, '-c', 'import os; print(os.environ.get("PWD"))'],
+                cwd=root, timeout=15)
+            self.assertFalse(timed_out)
+            self.assertEqual(rc, 0, err)
+            self.assertEqual(os.path.realpath(out.strip()), os.path.realpath(root))
+
+
 if __name__=='__main__': unittest.main()
