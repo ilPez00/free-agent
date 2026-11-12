@@ -64,6 +64,7 @@ EXHAUST_PATTERNS = [
     r"monthly (?:limit|quota)", r"no hours remaining", r"out of hours", r"0/\d+ hours",
     r"balance unavailable", r"balance is unavailable",
     r"subscription (?:expired|required)", r"plan (?:expired|limit)",
+    r"reached (?:the|your|its) limit", r"request_count", r"quotaexceeded",
 ]
 AUTH_PATTERNS = [
     r"authentication required", r"not authenticated", r"please log ?in", r"please sign ?in",
@@ -1295,7 +1296,8 @@ def error_evidence(rc: int, out: str, err: str) -> str:
             continue
         data = d.get("data", {})
         msg = d.get("message", {})
-        if (d.get("type") == "error" or d.get("error") or d.get("is_error")
+        if (d.get("type") in ("error", "runError", "agent_error", "turn_error")
+                or d.get("error") or d.get("is_error")
                 or d.get("status") in ("ERROR", "error", "failed")
                 or (isinstance(data, dict) and data.get("status") in ("error", "failed"))
                 or (isinstance(msg, dict) and msg.get("stopReason") == "error")
