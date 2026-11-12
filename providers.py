@@ -348,6 +348,49 @@ PROVIDERS = {
 DEFAULT_MODELS = {
     "nvidia": "nvidia/nemotron-3.5-super-vl-120b-a12b",
     "openrouter": "openrouter/free",
+    "groq-cloud": "openai/gpt-oss-120b",
+    "cerebras": "cerebras-labs/llama-3.3-70b",
+    "gemini": "gemini-2.5-flash",
+    "sambanova": "Meta-Llama-3.3-70B-Instruct",
+    "cloudflare": "@cf/meta/llama-3.1-8b-fast-v2",
+    "aion-labs": "aion-1.0-plus",
+    "nvidia-nim": "nvidia/llama-3.3-nemotron-super-49b-a12b-v1",
+    "scaleway": "meta-llama/llama-3.3-70b-instruct",
+    "ai-horde": "llama-3.3-70b",
+    "pollinations-ai": "llama-3.3-70b",
+    "z-ai": "glm-4.5-flash",
+    "zhipu-bigmodel": "glm-4.5-flash",
+    "siliconflow": "Qwen/Qwen2.5-Coder-32B-Instruct",
+    "qwen-alibaba": "qwen2.5-coder-32b-instruct",
+    "upstage": "solar-pro",
+    "sarvam-ai": "sarvam-34b",
+    "sensenova": "gpt-4o-mini",
+    "hyperbolic": "meta-llama/llama-3.3-70b-instruct",
+    "deepinfra": "meta-llama/llama-3.3-70b-instruct",
+    "fireworks-ai": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+    "novita-ai": "meta-llama/llama-3.3-70b-instruct",
+    "friendli-ai": "meta-llama-llama-3.3-70b-instruct",
+    "llm-kiwi": "meta-llama/llama-3.3-70b-instruct",
+    "llm7-io": "codestral-latest",
+    "meganova": "meta-llama/llama-3.3-70b-instruct",
+    "mixlayer": "meta-llama/llama-3.3-70b-instruct",
+    "moark": "meta-llama/llama-3.3-70b-instruct",
+    "modelscope": "Qwen/Qwen2.5-Coder-32B-Instruct",
+    "nous-portal": "meta-llama/llama-3.3-70b-instruct",
+    "novai": "meta-llama/llama-3.3-70b-instruct",
+    "opentyphoon": "meta-llama/llama-3.3-70b-instruct",
+    "requesty": "meta-llama/llama-3.3-70b-instruct",
+    "routeway": "meta-llama/llama-3.3-70b-instruct",
+    "simplellm": "meta-llama/llama-3.3-70b-instruct",
+    "token-harbor": "meta-llama/llama-3.3-70b-instruct",
+    "vectoree": "meta-llama/llama-3.3-70b-instruct",
+    "vlm-run": "meta-llama/llama-3.3-70b-instruct",
+    "zro": "meta-llama/llama-3.3-70b-instruct",
+}
+
+AUTO_DEFAULT_MODELS = {
+    "nvidia": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+    "openrouter": "openrouter/free",
 }
 
 _STATE = {
@@ -596,7 +639,9 @@ def run_pi(provider: str, model: str, task: str, workdir: str, timeout: float,
     cfg = _config(provider)
     if not cfg["pi"] or not cfg["base_url"]:
         return 78, "", f"{provider}: not runnable without extra account/config"
-    model = model or DEFAULT_MODELS.get(provider)
+    # Only the verified free routes auto-default; every other provider needs an
+    # explicit model so a paid account is never silently selected.
+    model = model or AUTO_DEFAULT_MODELS.get(provider)
     if not model:
         return 2, "", f"{provider}: explicit model required"
     key = get_key(provider, env_path)

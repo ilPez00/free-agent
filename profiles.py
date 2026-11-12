@@ -100,7 +100,7 @@ KEY_ALIASES = {
     "opentyphoon": ("OPENTYPHOON_API_KEY", "AI_OPENTYPHOON_KEY"),
     "ovh-ai": ("OVH_API_KEY", "AI_OVH_KEY"),
     "pollinations-ai": ("POLLINATIONS_API_KEY", "AI_POLLINATIONS_KEY"),
-    "qwen-alibaba": ("QWEN_API_KEY", "AI_QWEN_KEY"),
+    "qwen-alibaba": ("QWEN_API_KEY", "alibaba_modelstudio", "DASHSCOPE_API_KEY", "AI_QWEN_KEY"),
     "regolo-ai": ("REGOLO_API_KEY", "AI_REGOLO_KEY"),
     "replicate": ("REPLICATE_API_KEY", "AI_REPLICATE_KEY"),
     "requesty": ("REQUESTY_API_KEY", "AI_REQUESTY_KEY"),

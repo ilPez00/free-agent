@@ -116,10 +116,10 @@ class PiRegistryTests(Base):
 
     def test_opt_in_providers_need_explicit_model_env(self):
         extensions.initialize(fa)
-        self.assertNotIn("pi-groq", fa.WORKERS)
+        self.assertNotIn("pi-groq-cloud", fa.WORKERS)
         with patch.dict(os.environ, {"FREE_AGENT_PROVIDER_MODEL": "some/model"}):
             extensions.initialize(fa)
-        groq = fa.WORKERS["pi-groq"]
+        groq = fa.WORKERS["pi-groq-cloud"]
         self.assertFalse(groq.automatic)
         self.assertEqual(groq.model, "some/model")
 

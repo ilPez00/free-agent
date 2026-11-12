@@ -103,7 +103,9 @@ class KeyAndPolicyTests(unittest.TestCase):
             cfg = pv.PROVIDERS[name]
             self.assertIsNone(cfg["base_url"])
             self.assertFalse(cfg["pi"])
-        self.assertEqual(set(pv.DEFAULT_MODELS), {"nvidia", "openrouter"})
+        # Only verified free routes auto-default; other providers need explicit models.
+        self.assertEqual(set(pv.AUTO_DEFAULT_MODELS), {"nvidia", "openrouter"})
+        self.assertTrue({"nvidia", "openrouter"} <= set(pv.DEFAULT_MODELS))
         self.assertFalse(pv.PROVIDERS["sambanova"]["pi"])
 
     def test_endpoints_are_official_https(self):

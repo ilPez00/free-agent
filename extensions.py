@@ -131,9 +131,12 @@ def _child_env(agent, path: str | None = None):
 # ---------------------------------------------------------------------------
 
 def _pi_model(provider: str) -> str:
+    env_model = os.environ.get(OPT_IN_MODEL_ENV)
+    if env_model:
+        return env_model
     if provider in pv.DEFAULT_MODELS:
         return pv.DEFAULT_MODELS[provider]
-    return os.environ.get(OPT_IN_MODEL_ENV) or ""
+    return ""
 
 
 def _pi_installed() -> bool:
@@ -228,14 +231,34 @@ def _pi_worker(fa, provider: str, automatic: bool, priority: int):
 
 def _pi_workers(fa):
     workers = {}
+    # Primary free providers (automatic when credential present)
     for priority, provider in ((40, "nvidia"), (41, "openrouter")):
         model = _pi_model(provider)
         if model:
             workers[f"pi-{provider}"] = _pi_worker(
                 fa, provider, bool(_key(provider)), priority
             )
+    # All other providers with pi: True and a credential: register opt-in pi variants
+    # They are NOT automatic (free tier unverified); activate via config or env.
+    import providers as pv
+    offset = 62
+    for name, cfg in pv.PROVIDERS.items():
+        if name in ("nvidia", "openrouter"):
+            continue
+        if not cfg.get("pi"):
+            continue
+        if cfg.get("free_policy") in ("paid_or_trial_opt_in", "credential_only"):
+            continue
+        if not _key(name):
+            continue
+        model = _pi_model(name)
+        if not model:
+            continue
+        workers[f"pi-{name}"] = _pi_worker(fa, name, False, offset)
+        offset += 1
+    # Legacy opt-in env path (kept for compatibility)
     if os.environ.get(OPT_IN_MODEL_ENV):
-        for offset, provider in enumerate(OPT_IN_PROVIDERS, start=62):
+        for offset, provider in enumerate(OPT_IN_PROVIDERS, start=offset):
             workers[f"pi-{provider}"] = _pi_worker(fa, provider, False, offset)
     return workers
 
