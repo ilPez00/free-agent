@@ -35,7 +35,7 @@ DEFAULT_ROLE_PROMPT = "Complete the task: {task}"
 
 # Providers that may bill or need an unverified free tier are opt-in only.
 OPT_IN_PROVIDERS = (
-    "groq", "cerebras", "mistral", "gemini", "sambanova", "cohere", "together", "deepinfra",
+    "groq", "cerebras", "mistral", "gemini", "cohere", "together", "deepinfra",
 )
 OPT_IN_MODEL_ENV = "FREE_AGENT_PROVIDER_MODEL"
 

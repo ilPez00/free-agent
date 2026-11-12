@@ -280,6 +280,7 @@ class CredentialTests(Tmp):
             "together": "TOGETHER_API_KEY",
             "deepinfra": "DEEPINFRA_API_KEY",
         }
+        expected["sambanova"] = "AI_SAMBA_NOVA_KEY"
         for provider, alias in expected.items():
             self.assertEqual(
                 p.credential_for(provider, self.tmp / "absent", {alias: "k"}), "k"

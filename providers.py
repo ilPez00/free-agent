@@ -56,7 +56,7 @@ PROVIDERS = {
     },
     "sambanova": {
         "base_url": "https://api.sambanova.ai/v1",
-        "free_policy": "account_free_tier_unverified", "pi": True,
+        "free_policy": "account_free_tier_unverified", "pi": False,
     },
     "cohere": {
         "base_url": "https://api.cohere.com/compatibility/v1",

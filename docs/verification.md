@@ -15,7 +15,8 @@ A live reviewer-role smoke check exposed a pretty-printed JSON wrapper parsing d
 * NVIDIA Pi returned `NVIDIA_PI_OK`, and later wrote `multiply.py`. Its independent Python assertion checked `multiply(6, 7) == 42` and printed `NVIDIA_EDIT_CHECK_OK`. The loop completed in one iteration, then wrote a candidate with `approved: false`, `replayable: false`. NVIDIA cost remains unknown.
 * OpenRouter Pi returned `OPENROUTER_PI_OK`, then wrote `subtract.py`. Its independent Python assertion checked `subtract(9, 4) == 5` and printed `OPENROUTER_EDIT_CHECK_OK`. The loop completed in one iteration with reported cost `0`, using the catalog-checked free router.
 * Installed `nvidia-reviewer` role wrapper returned `ROLE_WRAPPER_OK` through role selection, a nested provider CLI invocation and result parsing. The read-only harness allowlist was enabled; this is not an OS sandbox assertion.
-* Groq/Cerebras/Mistral catalog HTTP 200 checks are NOT presented as inference or free billing tests. Gemini's selected native API key returned `API_KEY_INVALID`. The Gemini CLI live headless check failed, so its adapter remains manual-only and unverified. Jules help/version worked; login/repository consent/remote job execution were not attempted.
+* Groq Pi returned `GROQ_PI_OK`. The route remains explicit/manual because provider free-plan entitlement is account/model dependent.
+* Groq/Cerebras/Mistral/SambaNova catalog HTTP checks are NOT presented as free billing tests. Cerebras inference returned HTTP 402 and SambaNova chat inference HTTP 401. Jules help/version worked; login/repository consent/remote job execution were not attempted.
 
 ## Native Replant execution
 

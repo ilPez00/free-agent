@@ -20,10 +20,10 @@ The actual coding harness is Pi, in an isolated temporary configuration with ext
 | --- | --- | --- |
 | NVIDIA NIM/API catalog | `pi-nvidia`; live response plus real file-writing/verification loop passed. Pinned default `nvidia/nemotron-3.5-super-vl-120b-a12b`. Reported cost remains unknown. | Eligible when a usable key is present, as requested. Treat as development/evaluation capacity, not an infinite universal free budget. |
 | OpenRouter | `pi-openrouter`; live response passed. `openrouter/free` default; live discovery accepts only explicit free IDs whose prompt AND completion prices are finite zero. | Eligible with key. No paid-model or paid-provider fallback. The official free router chooses from free models and filters for request features.[14] |
-| Groq | API catalog read succeeded; explicit Pi route with a selected model. Published free-plan limits exist but apply per account/model.[16] | Opt-in; a key/catalog response is not proof of a free billing entitlement. |
-| Cerebras | API catalog read succeeded; explicit Pi route. Its rate limits/quota replenishment are independent of other vendors.[17] | Opt-in; current account tier unverified. |
+| Groq | Local credential selected (`GROQ_API_KEY`); live Pi inference returned `GROQ_PI_OK`. Published free-plan limits are account/model dependent.[16] | Explicit manual route; no automatic billing fallback. |
+| Cerebras | Local credential selected (`AI_CEREBRAS_KEY`); catalog readable, but a live Pi request returned HTTP 402 (payment/quota required), not free inference.[17] | Explicit manual route; treat this account as unavailable until the plan/quota is changed. |
 | Gemini API | Route implemented, but the selected stored key returned `API_KEY_INVALID` in the native API probe. CLI Google login is a separate auth path. Free-tier eligibility is project/account dependent.[18] | Opt-in; repair the selected key, do not cycle through the many other project keys in the shared file. |
-| SambaNova | Explicit Pi route and credential aliases added; no selected key found/tested. Official docs distinguish no-payment-method Free Tier and paid Developer Tier; use the published base URL.[23][24] | Opt-in, explicit model required. |
+| SambaNova | Local catalog credential selected (`AI_SAMBA_NOVA_KEY`); `/v1/models` returned HTTP 200 with five models. Live chat/completions returned HTTP 401, so inference is not authenticated. Official docs distinguish no-payment-method Free Tier and paid Developer Tier.[23][24] | Catalog-only; needs a valid SambaCloud API key/model and account activation. |
 | Mistral API | Catalog readable, but current billing docs explicitly say Free mode does NOT include API access; API use requires billing activation/PAYG.[22] | Paid/trial opt-in classification; never silently treat old “Experiment” claims as current API-free access. |
 | Cloudflare Workers AI | Credential inventory only until an account ID and a deliberate adapter configuration are supplied. Official pricing includes 10,000 free Neurons/day, with paid overage requiring a paid plan.[19] | Not auto-runnable. Do not enable paid overages or invent an account ID. |
 | Hugging Face Inference Providers | Credential inventory only. Current official pricing says free users receive no included monthly credits; purchasing credits or PRO is required.[20] | Not advertised as a free pool merely because a token exists. |
@@ -87,10 +87,10 @@ Same-user-writable manifests, registries and hash sidecars are mutable configura
 ## Verification and next access steps
 
 * Working inference/harness checks: NVIDIA Pi and OpenRouter Pi. Working live edit/check/proposal: NVIDIA Pi.
-* Catalog checks only: Groq, Cerebras, Mistral. No inference/billing claims inferred from these reads.
+* Catalog and inference checks: Groq passed. Catalog checks only: Cerebras (inference returned HTTP 402), Mistral, SambaNova (inference returned HTTP 401). No free/billing claims inferred from those reads.
 * Gemini API needs a valid selected key. Gemini CLI headless readiness remains unverified after a failing local check; use official Google login rather than treating API and OAuth entitlements as interchangeable.
 * Jules installed, official help/version checked; login/repository consent and remote job completion remain separate user-controlled steps.
-* Cloudflare needs account-scoped setup; SambaNova needs a selected key/model. HF/Mistral are not labelled free API inference just because old catalogs said so.
+* Cloudflare token is present but rejected by the account/token endpoints and no account ID is configured. SambaNova catalog access works but chat inference authentication fails. HF/Mistral are not labelled free API inference just because old catalogs said so.
 * Repository unit tests and real CLI/provider/Replant acceptance checks are recorded in the task's verification notes. GitHub Actions is still subject to the account's previously reported billing/spending-limit block; local green tests do not imply remote CI ran.
 
 ## Sources

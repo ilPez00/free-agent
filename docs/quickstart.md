@@ -18,9 +18,10 @@ Other configured API vendors are explicit opt-in because billing eligibility is 
 ```sh
 free-agent providers run groq 'Review this code; do not change it' --model openai/gpt-oss-120b --read-only -w /path/to/repo --json
 free-agent providers run cerebras 'Review this code; do not change it' --model gpt-oss-120b --read-only -w /path/to/repo --json
+free-agent providers models sambanova --json
 ```
 
-Verify your account plan first. Discover current IDs with `providers models PROVIDER`; a catalog is not an inference readiness test. Mistral/HF are NOT automatically labelled free API inference; Gemini's selected API key needs repair. SambaNova requires a selected key/model. Cloudflare needs account-scoped setup. Full sourced findings: [free-capacity-and-routing.md](free-capacity-and-routing.md).
+Groq passed a live Pi inference sentinel (`GROQ_PI_OK`). Cerebras inference returned HTTP 402, and SambaNova's catalog credential returned HTTP 200 for `/v1/models` but chat/completions returned HTTP 401; neither is silently treated as usable. Cloudflare has a local token but the account/token endpoints rejected it and no account ID is configured.
 
 ## Grok-Bot-style durable roles
 

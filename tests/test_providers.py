@@ -104,6 +104,7 @@ class KeyAndPolicyTests(unittest.TestCase):
             self.assertIsNone(cfg["base_url"])
             self.assertFalse(cfg["pi"])
         self.assertEqual(set(pv.DEFAULT_MODELS), {"nvidia", "openrouter"})
+        self.assertFalse(pv.PROVIDERS["sambanova"]["pi"])
 
     def test_endpoints_are_official_https(self):
         expected = {
