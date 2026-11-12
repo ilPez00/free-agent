@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "agents": [
+    {
+      "name": "pi-review",
+      "command": ["pi", "--print", "--mode", "json", "--no-extensions", "--no-mcp", "--tools", "read,grep,find,ls", "{task}"],
+      "roles": ["reviewer"],
+      "specialty": "review",
+      "automatic": false,
+      "timeout": 900,
+      "env": {},
+      "key_env": null
+    },
+    {
+      "name": "opencode-exec",
+      "command": ["opencode", "run", "--dir", "{workdir}", "--agent", "build", "{task}"],
+      "roles": ["builder"],
+      "specialty": "implementation",
+      "automatic": true,
+      "timeout": 1800,
+      "env": {},
+      "key_env": null
+    },
+    {
+      "name": "claude-planner",
+      "command": ["claude", "-p", "{task}"],
+      "roles": ["architect", "researcher"],
+      "specialty": "architecture",
+      "automatic": false,
+      "timeout": 1800,
+      "env": {},
+      "key_env": null
+    }
+  ],
+  "roles": {
+    "architect": {
+      "description": "Designs a plan; never edits files.",
+      "prompt": "You are the architect. Produce a concrete implementation plan for: {task}",
+      "tools": ["read"]
+    },
+    "reviewer": {
+      "description": "Read-only reviewer.",
+      "prompt": "Review the work read-only. Do not edit any file. Task: {task}",
+      "tools": ["read"]
+    },
+    "researcher": {
+      "description": "Gathers facts before implementation.",
+      "prompt": "Research the codebase and report findings for: {task}",
+      "tools": ["read", "search"]
+    },
+    "builder": {
+      "description": "Implements and verifies the change.",
+      "prompt": "Implement the task and run the repository tests. Task: {task}",
+      "tools": ["read", "write", "shell"]
+    }
+  }
+}

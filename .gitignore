@@ -4,5 +4,8 @@ __pycache__/
 .env
 .env.*
 state.json
+.replant/
+.free-agent/
+.physis/
 *.log
 *.jsonl

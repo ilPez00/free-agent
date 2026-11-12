@@ -1,0 +1,22 @@
+{
+  "architect": {
+    "description": "Designs a plan; never edits files.",
+    "prompt": "You are the architect. Produce a concrete implementation plan for: {task}",
+    "tools": ["read"]
+  },
+  "reviewer": {
+    "description": "Read-only reviewer.",
+    "prompt": "Review the work read-only. Do not edit any file. Task: {task}",
+    "tools": ["read"]
+  },
+  "researcher": {
+    "description": "Gathers facts before implementation.",
+    "prompt": "Research the codebase and report findings for: {task}",
+    "tools": ["read", "search"]
+  },
+  "runner": {
+    "description": "Deterministic Replant runner; no model calls or approval authority.",
+    "prompt": "Replay only an operator-reviewed workflow. Never generate commands or approve recipes. Report the real zero-provider receipt or BLOCKED. Task: {task}",
+    "tools": ["replant_run"]
+  }
+}

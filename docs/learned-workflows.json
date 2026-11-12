@@ -1,0 +1,20 @@
+{
+  "observed_at": "2026-11-12T09:19:10.262406+00:00",
+  "unique_learned_count": 1,
+  "discovery_scope": "Known default Hermes stores plus /home/gio/dev to depth 5; dependency/build/vendor directories and symlink aliases excluded. Two dev stores found; only hermes-physis held an indexed recipe.",
+  "learned": [
+    {
+      "id": "a307c0a39b41cd2b38e0c724b09562aafb073b2d77bad419bff398bec0cab0dd",
+      "prompt": "physis replant demo",
+      "steps": [
+        "increment"
+      ],
+      "checks": [
+        "verify"
+      ],
+      "store": "/home/gio/dev/hermes-physis/.replant"
+    }
+  ],
+  "repo_learned_count": 0,
+  "note": "Bundled demo only; scratch acceptance store and unapproved proposals are not production recipes."
+}

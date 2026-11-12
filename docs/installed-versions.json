@@ -124,5 +124,17 @@
     "installed": true,
     "version": "Google Cloud SDK 593.0.0",
     "exit_code": 0
+  },
+  {
+    "binary": "gemini",
+    "installed": true,
+    "version": "0.26.0",
+    "exit_code": 0
+  },
+  {
+    "binary": "jules",
+    "installed": true,
+    "version": "Version: v0.1.42",
+    "exit_code": 0
   }
 ]

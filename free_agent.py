@@ -36,6 +36,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
+import extensions
+import workflows
+
 STATE_PATH = Path(os.environ.get("FREE_AGENT_STATE", Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "free-agent/state.json"))
 NOTIFY = shutil.which("notify-send") or ""
 TMUX = shutil.which("tmux") or ""
@@ -189,6 +192,7 @@ class Worker:
     roles: list = field(default_factory=lambda: ["executor"])
     automatic: bool = True
     specialty: str = "implementation"
+    model: str = ""
 
 
 # ---------------------------------------------------------------------------
@@ -745,7 +749,12 @@ def extract_json_text(out: str) -> str:
         if isinstance(value, list):
             return "\n".join(str(v.get("text", "")) for v in value if isinstance(v, dict) and v.get("type") in ("text", "output_text"))
         return ""
-    for line in out.splitlines():
+    try:
+        # CLI wrappers return one indented JSON document, not JSONL events.
+        lines = [json.dumps(json.loads(out))]
+    except ValueError:
+        lines = out.splitlines()
+    for line in lines:
         try:
             d = json.loads(line)
         except ValueError:
@@ -769,6 +778,8 @@ def extract_json_text(out: str) -> str:
             item = d.get("item", {})
             if item.get("type") == "agent_message":
                 text = item.get("text", "")
+        elif d.get("ok") is True and not t and isinstance(d.get("text"), str):
+            text = d["text"]
         elif d.get("status") == "SUCCESS":
             text = d.get("response", "")
         if isinstance(text, str) and text.strip() and (not parts or text.strip() != parts[-1]):
@@ -1364,6 +1375,31 @@ def cmd_nudge(args) -> int:
     return 2 if rows else 0
 
 
+def cmd_run_replay(args, workdir: str) -> int:
+    """The runner role is deterministic: replay only, never an agent."""
+    manifest = getattr(args, "workflow_manifest", None) or extensions.manifest_default()
+    try:
+        result = workflows.replay(args.task, workdir, manifest, timeout=args.timeout)
+    except (ValueError, OSError) as exc:
+        if args.json:
+            print(json.dumps({"ok": False, "role": "runner", "error": str(exc)}))
+        else:
+            print(f"runner replay error: {exc}", file=sys.stderr)
+        return 1
+    ok = result.get("status") == "replayed"
+    if args.json:
+        print(json.dumps({"ok": ok, "role": "runner",
+                          "provider_calls": result.get("provider_calls"),
+                          "replay": result}, indent=2))
+    else:
+        print(f"[runner] {result.get('status')}: {result.get('reason')}")
+        if result.get("status") == "miss":
+            print("runner role does not fall back to a planner or agent", file=sys.stderr)
+    if ok:
+        return 0
+    return 1 if result.get("status") in ("miss", "disabled") else 2
+
+
 def cmd_run(args) -> int:
     state = load_state()
     workdir = os.path.abspath(args.workdir or os.getcwd())
@@ -1373,13 +1409,17 @@ def cmd_run(args) -> int:
         else:
             print(f"workdir not found: {workdir}", file=sys.stderr)
         return 1
+    if getattr(args, "role", "") == "runner":
+        return cmd_run_replay(args, workdir)
     names = [args.worker] if args.worker else None
     workers = ordered(names, getattr(args, "role", "executor"))
     if not workers:
         if args.json:
             print(json.dumps({"ok": False, "error": "no matching worker", "attempts": []}))
-        else:
+        elif args.worker:
             print(f"unknown worker: {args.worker}", file=sys.stderr)
+        else:
+            print(f"no worker for role: {getattr(args, 'role', '')}", file=sys.stderr)
         return 1
 
     attempts = []
@@ -1401,10 +1441,14 @@ def cmd_run(args) -> int:
             attempts.append({"worker": w.name, "reauth": reason})
             continue
         task = args.task
-        if "planner" in w.roles:
+        prompt = extensions.role_prompt_for(w, getattr(args, "role", ""), args.task)
+        if prompt is not None:
+            task = prompt
+        elif "planner" in w.roles:
             task = "PLAN ONLY. Do not modify files or execute state-changing commands. Specialty: " + w.specialty + ".\n" + task
         rc, out, err = w.run(task, workdir, args.timeout)
         res = validated_extract(w.extract, rc, out, err)
+        res.model = res.model or w.model or w.name
         if res.ok:
             clear(state, w.name)
             attempts.append({"worker": w.name, "ok": True, "model": res.model, "cost": res.cost})
@@ -1444,10 +1488,28 @@ def cmd_loop(args) -> int:
     workdir = os.path.abspath(args.workdir or os.getcwd())
     history = []
     task = args.task
+    manifest = getattr(args, "workflow_manifest", None) or extensions.manifest_default()
+    if manifest:
+        # Replay before any planner; only an exact miss may fall through.
+        try:
+            replay = workflows.replay(args.task, workdir, manifest, timeout=args.timeout)
+        except (ValueError, OSError) as exc:
+            print(json.dumps({"ok": False, "stage": "replay", "error": str(exc)}))
+            return 1
+        status = replay.get("status")
+        if status == "replayed":
+            print(json.dumps({"ok": True, "stage": "replay",
+                              "provider_calls": replay.get("provider_calls"),
+                              "replay": replay}, indent=2))
+            return 0
+        if status != "miss":
+            print(json.dumps({"ok": False, "stage": "replay", "replay": replay}, indent=2))
+            return 1 if status == "disabled" else 2
     def dispatch(prompt, worker=None, role="executor"):
         opts = argparse.Namespace(task=prompt, workdir=workdir, worker=worker,
                                   role=role, timeout=args.timeout, force=args.force,
-                                  no_notify=args.no_notify, json=True)
+                                  no_notify=args.no_notify, json=True,
+                                  workflow_manifest=None)
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer):
             rc = cmd_run(opts)
@@ -1467,6 +1529,16 @@ def cmd_loop(args) -> int:
         history[-1]["check_exit"] = check_rc
         history[-1]["check_output"] = (out + err)[-8000:]
         if check_rc == 0:
+            if getattr(args, "learn", False) and getattr(args, "artifact", None):
+                # Review-only proposal: never approved, recorded or replayed here.
+                try:
+                    history[-1]["candidate"] = workflows.propose(
+                        args.task, workdir, args.check, args.artifact,
+                        metadata={"worker": result.get("worker", ""),
+                                  "check_exit": check_rc,
+                                  "iterations": i + 1})
+                except (ValueError, OSError) as exc:
+                    history[-1]["candidate_error"] = str(exc)
             print(json.dumps({"ok": True, "iterations": i + 1, "history": history}, indent=2))
             return 0
         task = args.task + "\nPrevious verification failed. Fix it:\n" + (out + err)[-8000:]
@@ -1501,6 +1573,25 @@ def cmd_watch(args) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    json_flag = "--json" in argv
+    skip_user_config = any(flag in argv for flag in ("-h", "--help")) or (
+        bool(argv) and argv[0] in ("agent", "roles")
+    )
+    try:
+        # Before parser choices: registers pi-* and any user-config agents.
+        extensions.initialize(sys.modules[__name__], skip_user_config=skip_user_config)
+    except (ValueError, OSError) as exc:
+        # A broken user config must not take management commands down with it;
+        # dispatch stays fail-closed because an unvalidated config may not run.
+        if not argv or argv[0] in ("run", "loop"):
+            if json_flag:
+                print(json.dumps({"ok": False, "error": str(exc)}))
+            else:
+                print(str(exc), file=sys.stderr)
+            return 1
+        extensions.initialize(sys.modules[__name__], skip_user_config=True)
+
     p = argparse.ArgumentParser(prog="free-agent", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -1513,7 +1604,9 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("task")
     r.add_argument("--workdir", "-w", default=None)
     r.add_argument("--worker", default=None)
-    r.add_argument("--role", choices=["executor", "planner", "orchestrator"], default="executor")
+    r.add_argument("--role", default="executor")
+    r.add_argument("--workflow-manifest",
+                   default=os.environ.get("FREE_AGENT_WORKFLOW_MANIFEST"))
     r.add_argument("--timeout", type=float, default=600)
     r.add_argument("--force", action="store_true", help="retry exhausted workers")
     r.add_argument("--no-notify", action="store_true")
@@ -1542,6 +1635,12 @@ def main(argv: list[str] | None = None) -> int:
     loop.add_argument("--worker", default=None)
     loop.add_argument("--planner", default=None, choices=[n for n,w in WORKERS.items() if "planner" in w.roles])
     loop.add_argument("--check", required=True)
+    loop.add_argument("--workflow-manifest",
+                      default=os.environ.get("FREE_AGENT_WORKFLOW_MANIFEST"))
+    loop.add_argument("--learn", action="store_true",
+                      help="propose a review-only candidate after a verified success")
+    loop.add_argument("--artifact", action="append", default=[],
+                      help="input file to fingerprint (repeatable, with --learn)")
     loop.add_argument("--max-iterations", type=int, choices=range(1,11), default=2)
     loop.add_argument("--timeout", type=float, default=600)
     loop.add_argument("--force", action="store_true")
@@ -1549,7 +1648,104 @@ def main(argv: list[str] | None = None) -> int:
     loop.add_argument("--json", action="store_true")
     loop.set_defaults(func=cmd_loop)
 
-    args = p.parse_args(argv)
+    # user agent config
+    agent = sub.add_parser("agent", help="list/add/remove/validate user agents")
+    asub = agent.add_subparsers(dest="agent_cmd", required=True)
+    al = asub.add_parser("list", help="list configured agents (no secrets)")
+    al.add_argument("--config", default=None)
+    al.add_argument("--json", action="store_true")
+    al.set_defaults(func=extensions.cmd_agent)
+    aa = asub.add_parser("add", help="add an argv agent to the user config")
+    aa.add_argument("name")
+    aa.add_argument("--command-json", required=True,
+                    help="JSON argv array, e.g. '[\"pi\",\"--print\",\"{task}\"]'")
+    aa.add_argument("--role", default=None)
+    aa.add_argument("--specialty", default="")
+    aa.add_argument("--automatic", action="store_true")
+    aa.add_argument("--config", default=None)
+    aa.add_argument("--json", action="store_true")
+    aa.set_defaults(func=extensions.cmd_agent)
+    ar = asub.add_parser("remove", help="remove an agent from the user config")
+    ar.add_argument("name")
+    ar.add_argument("--config", default=None)
+    ar.add_argument("--json", action="store_true")
+    ar.set_defaults(func=extensions.cmd_agent)
+    av = asub.add_parser("validate", help="validate the user config")
+    av.add_argument("--config", default=None)
+    av.add_argument("--json", action="store_true")
+    av.set_defaults(func=extensions.cmd_agent)
+
+    # roles are instructions, not enforcement
+    roles = sub.add_parser("roles", help="list/set role prompts in the user config")
+    rsub = roles.add_subparsers(dest="roles_cmd", required=True)
+    rl = rsub.add_parser("list", help="list role prompts")
+    rl.add_argument("--config", default=None)
+    rl.add_argument("--json", action="store_true")
+    rl.set_defaults(func=extensions.cmd_roles)
+    rs = rsub.add_parser("set", help="set a role prompt")
+    rs.add_argument("name")
+    role_text = rs.add_mutually_exclusive_group(required=True)
+    role_text.add_argument("--prompt")
+    role_text.add_argument("--prompt-file", help="plain Markdown durable role instructions")
+    rs.add_argument("--description", default=None)
+    rs.add_argument("--tools", default=None, help="comma-separated tool names (metadata)")
+    rs.add_argument("--config", default=None)
+    rs.add_argument("--json", action="store_true")
+    rs.set_defaults(func=extensions.cmd_roles)
+
+    # provider registry and isolated Pi runs
+    prov = sub.add_parser("providers", help="list providers, model catalogs, run Pi")
+    prov.add_argument("--env-file", default=None,
+                      help="env file with credentials (default: FREE_AGENT_ENV_FILE or ~/.env)")
+    psub = prov.add_subparsers(dest="provider_cmd", required=True)
+    plist = psub.add_parser("list", help="credential presence and free policy (no values)")
+    plist.add_argument("--json", action="store_true")
+    plist.set_defaults(func=extensions.cmd_providers)
+    pmodels = psub.add_parser("models", help="sanitized model catalog")
+    pmodels.add_argument("name")
+    pmodels.add_argument("--json", action="store_true")
+    pmodels.set_defaults(func=extensions.cmd_providers)
+    prun = psub.add_parser("run", help="run one isolated Pi coding process")
+    prun.add_argument("name")
+    prun.add_argument("task")
+    prun.add_argument("--model", default=None)
+    prun.add_argument("--workdir", "-w", default=None)
+    prun.add_argument("--timeout", type=float, default=600)
+    prun.add_argument("--read-only", action="store_true")
+    prun.add_argument("--json", action="store_true")
+    prun.set_defaults(func=extensions.cmd_providers)
+
+    # deterministic workflows
+    wfs = sub.add_parser("workflows", help="list stores, replay, propose a candidate")
+    wsub = wfs.add_subparsers(dest="workflows_cmd", required=True)
+    wl = wsub.add_parser("list", help="inspect Replant stores without writing")
+    wl.add_argument("--store", default=".replant")
+    wl.add_argument("--all-stores", action="store_true",
+                    help="also inspect known ~/.hermes and ~/dev/hermes-physis stores")
+    wl.add_argument("--workdir", "-w", default=None)
+    wl.add_argument("--json", action="store_true")
+    wl.set_defaults(func=extensions.cmd_workflows)
+    wrun = wsub.add_parser("run", help="replay an exact learned workflow only")
+    wrun.add_argument("task")
+    wrun.add_argument("--manifest",
+                      default=os.environ.get("FREE_AGENT_WORKFLOW_MANIFEST"))
+    wrun.add_argument("--workdir", "-w", default=None)
+    wrun.add_argument("--timeout", type=float, default=120)
+    wrun.add_argument("--json", action="store_true")
+    wrun.set_defaults(func=extensions.cmd_workflows)
+    wprop = wsub.add_parser("propose", help="write a review-only candidate")
+    wprop.add_argument("task")
+    wprop.add_argument("--check", required=True)
+    wprop.add_argument("--artifact", action="append", default=[])
+    wprop.add_argument("--workdir", "-w", default=None)
+    wprop.add_argument("--json", action="store_true")
+    wprop.set_defaults(func=extensions.cmd_workflows)
+
+    try:
+        args = p.parse_args(argv)
+    except SystemExit as exc:
+        code = exc.code
+        return 0 if code is None else int(code)
     try:
         if int(os.environ.get("FREE_AGENT_DEPTH", "0")) >= 2 and args.cmd in ("run", "loop"):
             if getattr(args, "json", False):
@@ -1559,8 +1755,14 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         return args.func(args)
     except (ValueError, OSError) as e:
-        print(str(e), file=sys.stderr)
+        if json_flag:
+            print(json.dumps({"ok": False, "error": str(e)}))
+        else:
+            print(str(e), file=sys.stderr)
         return 1
+    except SystemExit as exc:
+        code = exc.code
+        return 0 if code is None else int(code)
 
 
 if __name__ == "__main__":

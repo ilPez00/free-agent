@@ -18,6 +18,21 @@ free-agent loop "Implement the feature" -w /path/to/repo --planner codex --worke
 
 The loop optionally plans, dispatches an executor, runs YOUR verification command, then sends failing output into the next bounded iteration. It stops on verification success, unavailable workers, or its iteration cap. `--check` executes via `/bin/sh -c`; only pass commands you trust. It is not a sandbox or a background service. Run independent jobs in separate worktrees. Interrupted loops do not have automatic checkpoint/resume.
 
+## Providers, durable roles and Replant
+
+Start here: [quickstart](docs/quickstart.md), [configuration](docs/configuration.md),
+[sourced capacity/routing research](docs/free-capacity-and-routing.md), and
+[deterministic workflows](docs/deterministic-workflows.md).
+
+New commands: `providers list/models/run`, `agent add/list/remove/validate`,
+`roles set/list`, `workflows list/run/propose`. `pi-nvidia` and `pi-openrouter`
+are real isolated Pi coding workers using local keys; OpenRouter is free-only.
+Other provider accounts require explicit plan/model decisions. Durable Markdown
+profiles live under `roles/`; `agents.free-api.example.json` supplies reusable
+architect/reviewer/builder wrappers. `runner` is reserved for zero-model Replant
+replay, not another LLM persona. `loop --learn --artifact ...` emits review-only
+candidates; `--workflow-manifest` tries approved replay before any planner.
+
 ## Roles
 
 | Worker | Default role | Specialty |

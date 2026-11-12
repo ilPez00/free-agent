@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "tools": "/opt/free-agent/tools.json",
+  "store": "/var/lib/free-agent/.replant",
+  "workflows": [
+    {
+      "prompt": "run the repository test suite and report the result",
+      "context": {},
+      "input": {},
+      "artifacts": {
+        "/opt/free-agent/inputs/pyproject.toml": "0000000000000000000000000000000000000000000000000000000000000000",
+        "/opt/free-agent/inputs/uv.lock": "0000000000000000000000000000000000000000000000000000000000000000"
+      }
+    }
+  ]
+}

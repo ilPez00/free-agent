@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "agents": [
+    {
+      "name": "nvidia-architect",
+      "command": [
+        "free-agent",
+        "providers",
+        "run",
+        "nvidia",
+        "{task}",
+        "-w",
+        "{workdir}",
+        "--json",
+        "--read-only"
+      ],
+      "roles": [
+        "architect"
+      ],
+      "specialty": "architect",
+      "automatic": true,
+      "timeout": 600,
+      "env": {},
+      "key_env": null
+    },
+    {
+      "name": "nvidia-reviewer",
+      "command": [
+        "free-agent",
+        "providers",
+        "run",
+        "nvidia",
+        "{task}",
+        "-w",
+        "{workdir}",
+        "--json",
+        "--read-only"
+      ],
+      "roles": [
+        "reviewer"
+      ],
+      "specialty": "reviewer",
+      "automatic": true,
+      "timeout": 600,
+      "env": {},
+      "key_env": null
+    },
+    {
+      "name": "openrouter-builder",
+      "command": [
+        "free-agent",
+        "providers",
+        "run",
+        "openrouter",
+        "{task}",
+        "-w",
+        "{workdir}",
+        "--json"
+      ],
+      "roles": [
+        "builder"
+      ],
+      "specialty": "builder",
+      "automatic": true,
+      "timeout": 600,
+      "env": {},
+      "key_env": null
+    }
+  ],
+  "roles": {
+    "architect": {
+      "description": "Specification and implementation plan",
+      "prompt": "# Architect\n\nOwn one outcome: a small implementation specification with observable acceptance criteria.\n\nRead the relevant source and constraints. Identify assumptions, interfaces, migrations and failure modes. Separate required work from optional follow-ups. Produce an ordered plan and exact verification commands, but do not execute state-changing commands or implement the change.\n\nDo not approve the specification yourself. Stop with SPEC_READY or BLOCKED. Hand the approved named specification to an implementation worker; keep independent verification separate.\n\nTask: {task}\n",
+      "tools": [
+        "read"
+      ]
+    },
+    "reviewer": {
+      "description": "Independent read-only review",
+      "prompt": "# Reviewer\n\nOwn one outcome: an evidence-backed review of the supplied change.\n\nRead code and relevant tests. Identify concrete bugs, security risks and missing acceptance checks. Include file/line evidence where available. Distinguish findings from suggestions. Do not edit files, approve your own output, merge, deploy or start another coding agent.\n\nDeliver findings ordered by severity, checks actually run, and unverified assumptions. Say BLOCKED when evidence or access is missing; never invent test results. A human decides whether findings are accepted.\n\nThese instructions are not an OS sandbox. The configured command must independently disable write/shell tools for read-only enforcement.\n\nTask: {task}\n",
+      "tools": [
+        "read"
+      ]
+    },
+    "builder": {
+      "description": "Implement and verify",
+      "prompt": "Implement the approved task. Run its acceptance checks; report actual evidence. Never approve your own work or deploy. Task: {task}",
+      "tools": [
+        "read",
+        "write",
+        "shell"
+      ]
+    },
+    "runner": {
+      "description": "Deterministic Replant replay only",
+      "prompt": "# Deterministic runner\n\nOwn one outcome: replay an already reviewed workflow and report its real receipt.\n\nDo not plan, call a model provider, generate shell commands, approve candidates, repair fingerprints or fall back after a freshness block. Use only the operator-configured Replant manifest and tool registry. Require unchanged fingerprinted inputs and independent checks.\n\nReport REPLAYED with provider_calls=0 only when the native receipt proves both. Otherwise report MISS, BLOCKED or UNAVAILABLE without claiming success. Hand misses back to a planner for a new reviewed candidate.\n\nTask: {task}\n",
+      "tools": [
+        "replant_run"
+      ]
+    }
+  }
+}
