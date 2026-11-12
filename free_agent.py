@@ -1274,7 +1274,8 @@ except Exception:
 # the model turn itself succeeded.
 _NON_FATAL_ERR = re.compile(
     r"(?i)(rmcp::transport|failed to load skill|tuicommander|"
-    r"mcp.*(server|transport).*(error|closed|quit))"
+    r"mcp.*(server|transport).*(error|closed|quit)|"
+    r"experimentalwarning|node:\d+.*warning)"
 )
 
 
