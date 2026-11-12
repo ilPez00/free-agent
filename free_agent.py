@@ -1269,9 +1269,22 @@ except Exception:
     pass  # Config errors are non-fatal; cli_agents remain optional
 
 
+# Background noise that must not be read as a worker failure: MCP server
+# transport errors and skill-loading warnings can appear on stderr even when
+# the model turn itself succeeded.
+_NON_FATAL_ERR = re.compile(
+    r"(?i)(rmcp::transport|failed to load skill|tuicommander|"
+    r"mcp.*(server|transport).*(error|closed|quit))"
+)
+
+
 def error_evidence(rc: int, out: str, err: str) -> str:
     """Never classify ordinary assistant replies or echoed prompts as failures."""
-    errors = [err] if rc else [line for line in err.splitlines() if re.search(r"(?i)(error|failed|unauthorized|authentication required|quota exceeded)", line)]
+    def _keep(line: str) -> bool:
+        return bool(re.search(r"(?i)(error|failed|unauthorized|authentication required|quota exceeded)", line)) \
+            and not _NON_FATAL_ERR.search(line)
+
+    errors = [err] if rc else [line for line in err.splitlines() if _keep(line)]
     for line in out.splitlines():
         try:
             d = json.loads(line)
