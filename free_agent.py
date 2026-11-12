@@ -856,6 +856,14 @@ def crush_login() -> dict:
 # ---------------------------------------------------------------------------
 
 def codex_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
+    # Codex builds a shell snapshot from the user's interactive shell. Shell
+    # configs that install odd aliases (e.g. x-cmd's fullwidth-comma and "+="
+    # aliases) produce an unparseable snapshot, which makes codex exit non-zero
+    # even though the model turn succeeded. A minimal ZDOTDIR avoids that while
+    # still inheriting provider keys from ~/.env.
+    zdotdir = Path.home() / ".codex/zdotdir/.zshrc"
+    if zdotdir.is_file():
+        os.environ.setdefault("ZDOTDIR", str(zdotdir.parent))
     return _generic_json_worker(["codex", "exec", task, "--json", "--sandbox", "read-only",
                                  "--skip-git-repo-check"], task, workdir, timeout)
 
@@ -1276,7 +1284,8 @@ except Exception:
 _NON_FATAL_ERR = re.compile(
     r"(?i)(rmcp::transport|failed to load skill|tuicommander|"
     r"mcp.*(server|transport).*(error|closed|quit)|"
-    r"experimentalwarning|node:\d+.*warning)"
+    r"experimentalwarning|node:\d+.*warning|"
+    r"shell_snapshot)"
 )
 
 
@@ -1286,7 +1295,10 @@ def error_evidence(rc: int, out: str, err: str) -> str:
         return bool(re.search(r"(?i)(error|failed|unauthorized|authentication required|quota exceeded)", line)) \
             and not _NON_FATAL_ERR.search(line)
 
-    errors = [err] if rc else [line for line in err.splitlines() if _keep(line)]
+    # Filter background noise even on failure: a non-zero exit can still be
+    # caused by a fatal error elsewhere, and stderr may carry unrelated
+    # transport/snapshot noise from a successful model turn.
+    errors = [line for line in err.splitlines() if _keep(line)]
     for line in out.splitlines():
         try:
             d = json.loads(line)
