@@ -103,6 +103,13 @@ def classify(text: str) -> tuple[bool, bool, str]:
 def run_cmd(cmd: list[str], cwd: str | None = None, timeout: float = 120,
             env: dict | None = None, input_text: str | None = None) -> tuple[int, str, str]:
     timeout = max(0.05, min(float(timeout), 3600))
+    if cwd is not None:
+        # `cwd=` moves the child but leaves the parent's PWD in its environment,
+        # and some CLIs (opencode) trust PWD over getcwd(). Without this the
+        # worker silently reads and edits the caller's repository instead of the
+        # requested workdir, and still reports success.
+        env = dict(os.environ if env is None else env)
+        env["PWD"] = os.path.abspath(cwd)
     try:
         p = subprocess.Popen(cmd, cwd=cwd, env=env, stdin=subprocess.PIPE,
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
