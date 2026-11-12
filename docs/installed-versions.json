@@ -1,0 +1,128 @@
+[
+  {
+    "binary": "opencode",
+    "installed": true,
+    "version": "opencode v2.2.7",
+    "exit_code": 0
+  },
+  {
+    "binary": "cline",
+    "installed": true,
+    "version": "3.0.74",
+    "exit_code": 0
+  },
+  {
+    "binary": "kilo",
+    "installed": true,
+    "version": "7.8.27",
+    "exit_code": 0
+  },
+  {
+    "binary": "kiro-cli",
+    "installed": true,
+    "version": "kiro-cli 3.1.0",
+    "exit_code": 0
+  },
+  {
+    "binary": "copilot",
+    "installed": true,
+    "version": "GitHub Copilot CLI 1.0.109.",
+    "exit_code": 0
+  },
+  {
+    "binary": "codex",
+    "installed": true,
+    "version": "codex-cli 0.167.2",
+    "exit_code": 0
+  },
+  {
+    "binary": "pi",
+    "installed": true,
+    "version": "1.5.2",
+    "exit_code": 0
+  },
+  {
+    "binary": "agent",
+    "installed": true,
+    "version": "2026.11.11-b912975",
+    "exit_code": 0
+  },
+  {
+    "binary": "vibe",
+    "installed": true,
+    "version": "vibe 3.1.2",
+    "exit_code": 0
+  },
+  {
+    "binary": "crush",
+    "installed": true,
+    "version": "crush version v0.100.0",
+    "exit_code": 0
+  },
+  {
+    "binary": "qwen",
+    "installed": true,
+    "version": "0.27.2",
+    "exit_code": 0
+  },
+  {
+    "binary": "goose",
+    "installed": true,
+    "version": "1.59.0",
+    "exit_code": 0
+  },
+  {
+    "binary": "freebuff",
+    "installed": true,
+    "version": "0.2.36",
+    "exit_code": 0
+  },
+  {
+    "binary": "free-pi-cli",
+    "installed": true,
+    "version": "free-pi-cli 0.6.19",
+    "exit_code": 0
+  },
+  {
+    "binary": "aider",
+    "installed": true,
+    "version": "aider 0.86.2",
+    "exit_code": 0
+  },
+  {
+    "binary": "agy",
+    "installed": true,
+    "version": "1.5.6",
+    "exit_code": 0
+  },
+  {
+    "binary": "claude",
+    "installed": true,
+    "version": "2.1.322 (Claude Code)",
+    "exit_code": 0
+  },
+  {
+    "binary": "grok",
+    "installed": true,
+    "version": "grok 1.0.77 (50ca579fa996)",
+    "exit_code": 0
+  },
+  {
+    "binary": "kimi",
+    "installed": true,
+    "version": "2.5.3",
+    "exit_code": 0
+  },
+  {
+    "binary": "amp",
+    "installed": true,
+    "version": "0.0.1794456033-gb2ff22 (released 2026-11-12T04:00:33.000Z, 4h ago)",
+    "exit_code": 0
+  },
+  {
+    "binary": "gcloud",
+    "installed": true,
+    "version": "Google Cloud SDK 593.0.0",
+    "exit_code": 0
+  }
+]
