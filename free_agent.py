@@ -464,16 +464,20 @@ def fb_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
         return 3, pane, "freebuff is not logged in (Press ENTER to login)"
     _tmux("send-keys", "-t", FB_SESSION, "-l", task)
     _tmux("send-keys", "-t", FB_SESSION, "Enter")
-    # wait for the reply to stream in and the pane to settle
+    # Wait for freebuff's completion marker ("• 8s •") to appear AND the pane to
+    # settle. Without the marker a stable-but-idle pane breaks the loop before
+    # the model has answered.
+    baseline = _fb_pane()
     deadline = time.time() + timeout
     last = None
     stable = 0
     while time.time() < deadline:
         pane = _fb_pane()
-        if "thinking..." not in pane and "esc to stop" not in pane.lower():
+        done = re.search(r"•\s*\d+s\s*•", pane)
+        if done and pane != baseline:
             if pane == last:
                 stable += 1
-                if stable >= 5:
+                if stable >= 3:
                     break
             else:
                 stable = 0
@@ -489,9 +493,31 @@ def fb_extract(rc: int, out: str, err: str) -> Result:
     if rc == 3:
         return Result(ok=False, text="", exhausted=False, auth_required=True,
                       reason="freebuff not logged in")
-    # keep the last non-empty block of the pane (the assistant reply)
-    lines = [ln.rstrip() for ln in out.splitlines() if ln.strip()]
-    text = "\n".join(lines[-25:]).strip()
+    lines = out.splitlines()
+    # The assistant reply sits between the echoed task (which ends with the ⎘
+    # paste marker) and freebuff's timing marker ("• 8s •"). Everything else is
+    # TUI chrome.
+    end = len(lines)
+    for i, ln in enumerate(lines):
+        if re.search(r"•\s*\d+s\s*•", ln):
+            end = i
+            break
+    reply: list[str] = []
+    for ln in reversed(lines[:end]):
+        s = ln.strip()
+        if not s:
+            if reply:
+                break
+            continue
+        if s.endswith("⎘"):
+            break
+        if re.match(r"^\[\d{1,2}:\d{2}\s*(AM|PM)\]$", s):
+            continue
+        reply.append(s)
+    text = "\n".join(reversed(reply)).strip()
+    if not text:
+        # Fall back to the last non-empty block when the markers are absent.
+        text = "\n".join(ln.strip() for ln in lines if ln.strip())[-800:].strip()
     ok = rc == 0 and bool(text) and not ex and not au
     return Result(ok=ok, text=text, exhausted=ex, auth_required=au, reason=reason,
                   model="freebuff-default")
@@ -651,17 +677,22 @@ def pty_generic(cmd: list[str], ready_markers: list[str], task: str,
     pane = _fb_wait_session(session, ready_markers, 90)
     _tmux("send-keys", "-t", session, "-l", task)
     _tmux("send-keys", "-t", session, "Enter")
+    # Wait until the pane actually changes from its post-submit state (the reply
+    # has streamed in) and then settles. Breaking on stability alone fires
+    # while the model is still thinking, before any answer exists.
+    baseline = _fb_pane_session(session)
     deadline = time.time() + timeout
     last, stable = None, 0
     while time.time() < deadline:
         pane = _fb_pane_session(session)
-        if pane == last:
-            stable += 1
-            if stable >= 6:
-                break
-        else:
-            stable = 0
-            last = pane
+        if pane != baseline:
+            if pane == last:
+                stable += 1
+                if stable >= 4:
+                    break
+            else:
+                stable = 0
+                last = pane
         time.sleep(1.5)
     _tmux("kill-session", "-t", session)
     return 0, pane, ""
@@ -696,34 +727,45 @@ def freepi_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
 
 
 def freepi_extract(rc: int, out: str, err: str) -> Result:
-    parts: list[str] = []
-    for line in out.splitlines():
-        line = line.strip()
-        if not line:
+    # free-pi is a TUI: the reply is the last content block before the ad panel
+    # and the footer. Walk backwards past the chrome; the blank line after the
+    # block separates it from the echoed task above.
+    rev = list(reversed(out.splitlines()))
+    reply: list[str] = []
+    in_ad = False
+    sep = None
+    for idx, ln in enumerate(rev):
+        s = ln.strip()
+        if in_ad:
+            if s.startswith("└"):
+                in_ad = False
             continue
-        if line.startswith("{"):
-            try:
-                d = json.loads(line)
-            except Exception:
-                continue
-            if d.get("type") in ("agent_end", "turn_end"):
-                for m in d.get("messages", []) if isinstance(d.get("messages"), list) else []:
-                    if m.get("role") == "assistant":
-                        c = m.get("content")
-                        if isinstance(c, str) and c.strip():
-                            parts.append(c.strip())
-                        elif isinstance(c, list):
-                            for item in c:
-                                if isinstance(item, dict) and isinstance(item.get("text"), str):
-                                    if item["text"].strip():
-                                        parts.append(item["text"].strip())
-            for key in ("text", "response"):
-                v = d.get(key)
-                if isinstance(v, str) and v.strip():
-                    parts.append(v.strip())
-        else:
-            parts.append(line)
-    text = "\n".join(parts).strip() or out.strip()
+        if s.startswith("┌ AD"):
+            in_ad = True
+            continue
+        if not s:
+            if reply:
+                sep = idx
+                break
+            continue
+        if s.startswith(("─", "╭", "╰", "│")):
+            continue
+        if (s.startswith("Try ") or "credits" in s or s.startswith("free-pi v")
+                or s.startswith("What's new") or s.startswith("Tip:")):
+            continue
+        reply.append(s)
+        if len(reply) >= 40:
+            break
+    text = "\n".join(reversed(reply)).strip()
+    # A real reply is a content block separated by a blank line from the echoed
+    # task above it; a lone content block is the echo, not an answer.
+    if sep is None:
+        text = ""
+    else:
+        above = [l.strip() for l in rev[sep + 1:] if l.strip()]
+        above = [l for l in above if not l.startswith(("─", "╭", "╰", "│", "┌ AD", "└"))]
+        if not above:
+            text = ""
     blob = out + "\n" + err
     ex, au, reason = classify(blob)
     ok = rc == 0 and bool(text) and not ex and not au
@@ -1146,14 +1188,14 @@ WORKERS: dict[str, Worker] = {
     ),
     "freebuff": Worker(
         name="freebuff", description="Freebuff (PTY/tmux; no headless mode)",
-        priority=50, headless=False,
+        priority=5, headless=False,
         reauth="freebuff login",
         run=fb_run, extract=fb_extract, quota=fb_quota, login=fb_login,
         installed=fb_installed,
     ),
     "freepi": Worker(
         name="freepi", description="free-pi-cli (GitHub sign-in, ad-supported; PTY/tmux, TUI-only)",
-        priority=55, headless=False,
+        priority=6, headless=False,
         reauth="free-pi-cli   # GitHub sign-in (browser or --device-login)",
         run=freepi_run, extract=freepi_extract, quota=freepi_quota, login=freepi_login,
         installed=freepi_installed,
@@ -1328,9 +1370,7 @@ def validated_extract(extract, rc, out, err):
     result = extract(rc, out, err)
     had_reply = result.ok or result.exhausted or result.auth_required
     if extract is fb_extract:
-        had_reply = bool(re.search(r"•\s*\d+s\s*•", out)) and "Enter a coding task" in out
-    if extract is freepi_extract:
-        had_reply = False  # no stable machine-readable completion contract yet
+        had_reply = bool(re.search(r"•\s*\d+s\s*•", out))
     result.exhausted, result.auth_required = ex, au
     # Only actual error channels matter, not keyword matches in successful text.
     result.ok = rc == 0 and had_reply and bool(result.text.strip()) and not evidence
