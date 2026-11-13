@@ -253,7 +253,10 @@ def install_missing(host: str | None = None, dry: bool = False) -> int:
         if host is None:
             _run(["npm", "install", "-g", pkg] + ([flag] if flag else []), timeout=900)
         else:
-            _run(["ssh", host, cmd], timeout=900)
+            # non-interactive ssh does not load ~/.zshrc, so npm may be off PATH
+            _run(["ssh", host,
+                  "export PATH=\"$HOME/.npm-global/bin:$HOME/.local/bin:$PATH\"; " + cmd],
+                 timeout=900)
     return 0
 
 

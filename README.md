@@ -43,9 +43,9 @@ candidates; `--workflow-manifest` tries approved replay before any planner.
 | AGY | planner, explicit opt-in only | ecosystem |
 | Kimi Code | planner | synthesis |
 | Hermes | executor and orchestrator | coordination |
-| OpenCode, Cline, Kilo, Kiro, Copilot, Pi | executor | implementation |
+| OpenCode, Cline, Kilo, Kiro, Copilot, Pi, Continue, Cody | executor | implementation |
 | Cursor, Vibe, Crush, Qwen, Goose, Aider, Amp | explicit opt-in executor | configured provider |
-| Freebuff, free-pi | experimental manual-only PTY | implementation |
+| Freebuff, free-pi | executor (top priority, PTY/tmux) | implementation |
 
 Planner-only workers are never selected by default executor routing. `--worker NAME` deliberately overrides role selection. Codex uses read-only sandbox; Claude uses plan permission mode. Grok/Kimi/AGY receive a plan-only instruction, which is NOT an OS-enforced sandbox. AGY is deferred and excluded from automatic routing. Hermes subprocess recursion is capped by `FREE_AGENT_DEPTH`; it uses the real Hermes launcher, not an unrelated `hermes` executable on PATH.
 
@@ -58,13 +58,27 @@ Installation is NOT authentication, a subscription, or an inference allowance. U
 * `free-agent nudge` reports recorded failures; it does not launch inference or interactive login flows. A host cron can call it every 30 minutes. Desktop notifications use `notify-send` if present.
 * No tokens, auth stores, user config, transcripts, or runtime state are shipped in this repo. State is written atomically with private file permissions to `$XDG_CACHE_HOME/free-agent/state.json` (default `~/.cache/...`). Set `FREE_AGENT_STATE` to override. Separate jobs should use separate state paths; concurrent state merging is not implemented.
 
-Useful logins: `copilot login`, `agent login` (Cursor), `codex login`, `claude auth login`, `kimi login`, `kilo auth login`, `kiro-cli login`, `vibe --setup`, `grok`, `freebuff login`, `free-pi-cli`, `amp login`.
+Useful logins: `copilot login`, `agent login` (Cursor), `codex login`, `claude auth login`, `kimi login`, `kilo auth login`, `kiro-cli login`, `vibe --setup`, `grok`, `freebuff login`, `free-pi-cli`, `cn login` (Continue), `cody auth login`, `amp login`.
+
+## Fleet configurator
+
+`free-agent-configure` (source `scripts/configure.py`) detects, configures, installs and deploys the workers across every host in `~/.fleet_aliases.sh` (`*-ts` Tailscale aliases are deduplicated):
+
+```sh
+free-agent-configure scan      # installed / free-tier / priority for one host
+free-agent-configure apply     # write ~/.config/free-agent/agents.json free routes
+free-agent-configure install   # npm-install the missing catalog agents
+free-agent-configure deploy    # apply + scp config + git pull on every host
+free-agent-configure doctor    # fleet scan + gaps + exact login commands
+```
+
+The agent catalog at the top of `scripts/configure.py` is the single source of truth: adding an agent means adding one row (binary, npm package, login command, free-tier cadence, priority).
 
 ## Installation coverage
 
 See [docs/installers.md](docs/installers.md). The host installation includes the Google Cloud SDK (`gcloud`) for Vertex AI. Vertex is an API service, NOT another agent executable or guaranteed free pool. Cloud login, project selection, Vertex API enablement, trial eligibility and billing setup require the account owner's decisions and have NOT been activated by this project. Amazon Q CLI has become Kiro CLI; it is not an independent quota pool.
 
-Freebuff and free-pi are TUI-only on the versions tested. Their PTY adapters are experimental and excluded from automatic routing. Freebuff requires its completion marker; free-pi currently fails closed because no reliable completion contract has been verified. Use its native terminal UI instead. PTY sessions can collide if run concurrently; do not run multiple jobs for the same TUI worker. No ads are suppressed, tokens spoofed, or hidden API gates bypassed.
+Freebuff and free-pi are TUI-only, so their adapters drive a tmux pane. They are the top-priority automatic workers (priority 5 and 6) and are now the first executors routing selects. Freebuff is detected through its `• Ns •` completion marker; free-pi is detected through the reply block that follows the echoed task and precedes the ad panel, and a lone content block is rejected as an echo so an unanswered turn can never report success. PTY sessions can collide if run concurrently; do not run multiple jobs for the same TUI worker. No ads are suppressed, tokens spoofed, or hidden API gates bypassed.
 
 Free tiers and promotional models change; no stable capacity is promised. Provider privacy/training policies vary. Do not send secrets or confidential code without checking the provider's policies. Executors can modify files and run commands; some existing executor recipes auto-approve tools. Use isolated worktrees or an OS sandbox, and review diffs before committing. A successful agent response is not proof the task is correct: use the loop's verification gate.
 
