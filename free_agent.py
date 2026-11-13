@@ -62,6 +62,7 @@ EXHAUST_PATTERNS = [
     r"spend_limited", r"model_locked", r"model_unavailable", r"ip_capped",
     r"premium_slot_taken", r"purchase_capacity", r"daily limit", r"weekly limit",
     r"monthly (?:limit|quota)", r"no hours remaining", r"out of hours", r"0/\d+ hours",
+    r"not enough hours", r"an hour on it takes",
     r"balance unavailable", r"balance is unavailable",
     r"subscription (?:expired|required)", r"plan (?:expired|limit)",
     r"reached (?:the|your|its) limit", r"request_count", r"quotaexceeded",
@@ -1425,6 +1426,17 @@ def validated_extract(extract, rc, out, err):
     had_reply = result.ok or result.exhausted or result.auth_required
     if extract is fb_extract:
         had_reply = bool(re.search(r"•\s*\d+s\s*•", out))
+    if extract in (fb_extract, freepi_extract):
+        # TUI panes are not JSON, so a limit banner is the only place the quota
+        # wall exists — and it can land inside the reply block. Banner text is a
+        # quota/auth signal, never an answer; a legitimate reply that merely
+        # discusses rate limits does not match these patterns.
+        banner_ex, banner_au, banner_reason = classify(result.text or out)
+        if banner_ex or banner_au:
+            ex, au = ex or banner_ex, au or banner_au
+            reason = reason or banner_reason
+            result.text = ""
+            had_reply = False
     result.exhausted, result.auth_required = ex, au
     # Only actual error channels matter, not keyword matches in successful text.
     result.ok = rc == 0 and had_reply and bool(result.text.strip()) and not evidence

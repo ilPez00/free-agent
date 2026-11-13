@@ -98,6 +98,40 @@ class RouterTests(unittest.TestCase):
         self.assertFalse(r.ok)
         self.assertTrue(r.auth_required)
 
+    def test_freebuff_quota_banner_is_exhaustion(self):
+        # A TUI pane is not JSON, so the limit banner only reaches classify() via
+        # the raw pane text. Without it a quota wall reads as "empty response".
+        pane = ("  Reply exactly FB_OK. ⎘\n"
+                "┌──────────────────────────────────────────────┐\n"
+                "│ Not enough hours for DeepSeek V4.1 Flash: an hour on it takes 2 hours. │\n"
+                "│ Enter: choose another model  Esc: back to draft                    │\n"
+                "└──────────────────────────────────────────────┘\n"
+                " DeepSeek V4.1 Flash • high · /tmp · /model to change\n")
+        r = fa.validated_extract(fa.fb_extract, 0, pane, "")
+        self.assertFalse(r.ok)
+        self.assertTrue(r.exhausted)
+        self.assertIn("hours", r.reason)
+
+    def test_freebuff_success_not_false_exhaustion(self):
+        # The footer legitimately mentions credits; that must not read as a quota wall.
+        pane = ("  Reply exactly FB_OK. ⎘\n"
+                "FB_OK\n"
+                "                    ⎘ • 8s • △▽\n"
+                " /tmp   3,472 + 2,000 credits · 🔥 particle · free\n")
+        r = fa.validated_extract(fa.fb_extract, 0, pane, "")
+        self.assertTrue(r.ok)
+        self.assertEqual(r.text, "FB_OK")
+        self.assertFalse(r.exhausted)
+
+    def test_freepi_quota_banner_is_exhaustion(self):
+        pane = (" Reply exactly FP_OK.\n\n\n"
+                " You've reached your daily limit. Upgrade or come back tomorrow.\n\n"
+                " ┌ AD ░▒▓ ────────────────┐\n │ ad copy │\n └────────────────────────┘\n"
+                " /tmp   0 + 0 credits · free\n")
+        r = fa.validated_extract(fa.freepi_extract, 0, pane, "")
+        self.assertFalse(r.ok)
+        self.assertTrue(r.exhausted)
+
     def test_private_atomic_state(self):
         fa.save_state({'workers': {}})
         self.assertEqual(self.state.stat().st_mode & 0o777, 0o600)
