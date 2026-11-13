@@ -727,45 +727,32 @@ def freepi_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
 
 
 def freepi_extract(rc: int, out: str, err: str) -> Result:
-    # free-pi is a TUI: the reply is the last content block before the ad panel
-    # and the footer. Walk backwards past the chrome; the blank line after the
-    # block separates it from the echoed task above.
-    rev = list(reversed(out.splitlines()))
-    reply: list[str] = []
-    in_ad = False
-    sep = None
-    for idx, ln in enumerate(rev):
+    # free-pi is a TUI. The pane is: header, echoed task, blank, reply, blank,
+    # ad panel, footer. Cut at the ad/footer, split what's left into
+    # blank-separated blocks, drop chrome, and take the last block as the reply
+    # — but only when an echoed task precedes it (a lone block is the echo).
+    lines = out.splitlines()
+    cut = len(lines)
+    for i, ln in enumerate(lines):
         s = ln.strip()
-        if in_ad:
-            if s.startswith("└"):
-                in_ad = False
-            continue
-        if s.startswith("┌ AD"):
-            in_ad = True
-            continue
-        if not s:
-            if reply:
-                sep = idx
-                break
-            continue
-        if s.startswith(("─", "╭", "╰", "│")):
-            continue
-        if (s.startswith("Try ") or "credits" in s or s.startswith("free-pi v")
-                or s.startswith("What's new") or s.startswith("Tip:")):
-            continue
-        reply.append(s)
-        if len(reply) >= 40:
+        if s.startswith("┌ AD") or s.startswith("Try \"explain") or "credits ·" in s:
+            cut = i
             break
-    text = "\n".join(reversed(reply)).strip()
-    # A real reply is a content block separated by a blank line from the echoed
-    # task above it; a lone content block is the echo, not an answer.
-    if sep is None:
-        text = ""
-    else:
-        above = [l.strip() for l in rev[sep + 1:] if l.strip()]
-        above = [l for l in above if not l.startswith(("─", "╭", "╰", "│", "┌ AD", "└"))]
-        if not above:
-            text = ""
+    blocks: list[list[str]] = []
+    cur: list[str] = []
+    for ln in lines[:cut]:
+        s = ln.strip()
+        if not s:
+            if cur:
+                blocks.append(cur)
+                cur = []
+            continue
+        cur.append(s)
+    if cur:
+        blocks.append(cur)
+    blocks = [b for b in blocks if not any(
+        x.startswith(("Warning:", "Tip:", "──", "┌", "└", "│", "╭", "╰")) for x in b)]
+    text = "\n".join(blocks[-1]).strip() if len(blocks) >= 2 else ""
     blob = out + "\n" + err
     ex, au, reason = classify(blob)
     ok = rc == 0 and bool(text) and not ex and not au
