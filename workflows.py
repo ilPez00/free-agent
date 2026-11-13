@@ -129,9 +129,16 @@ def _redact(text):
 
 def _exec(argv, payload=None, cwd=None, timeout=30):
     """Run a command in its own process group; kill the group on timeout."""
+    # An inherited PWD points at the caller's directory; a CLI that trusts it
+    # would run here instead of `cwd` (see free_agent.run_cmd).
+    env = None
+    if cwd:
+        env = dict(os.environ)
+        env["PWD"] = os.path.abspath(cwd)
     process = subprocess.Popen(
         argv,
         cwd=cwd,
+        env=env,
         stdin=subprocess.PIPE if payload is not None else subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

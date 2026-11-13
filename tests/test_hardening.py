@@ -3,6 +3,7 @@ import io
 import json
 import os
 from pathlib import Path
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -68,6 +69,67 @@ class HardeningTests(unittest.TestCase):
     def test_invalid_role_template_rejected_at_load(self):
         cfg={'version':1,'agents':[],'roles':{'reviewer':{'prompt':'bad {untrusted}'}}}
         with self.assertRaises(ValueError): profiles.validate_config(cfg)
+
+
+class WorkdirIsVisibleToTheChild(unittest.TestCase):
+    def test_run_cmd_sets_pwd_to_the_requested_workdir(self):
+        # `cwd=` alone left PWD stale, so a CLI that trusts PWD (opencode) worked
+        # in the caller's repository while reporting success.
+        with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as root:
+            rc, out, err = fa.run_cmd(
+                [sys.executable, '-c', 'import os; print(os.getcwd()); print(os.environ.get("PWD"))'],
+                cwd=root, timeout=15)
+            self.assertEqual(rc, 0, err)
+            cwd_line, pwd_line = out.strip().splitlines()
+            self.assertEqual(os.path.realpath(cwd_line), os.path.realpath(root))
+            self.assertEqual(os.path.realpath(pwd_line), os.path.realpath(root))
+
+    def test_run_cmd_keeps_a_caller_supplied_env(self):
+        with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as root:
+            rc, out, _ = fa.run_cmd(
+                [sys.executable, '-c', 'import os; print(os.environ.get("KEEP")); print(os.environ.get("PWD"))'],
+                cwd=root, timeout=15, env={'KEEP': 'yes', 'PATH': os.environ.get('PATH', '')})
+            self.assertEqual(rc, 0)
+            kept, pwd_line = out.strip().splitlines()
+            self.assertEqual(kept, 'yes')
+            self.assertEqual(os.path.realpath(pwd_line), os.path.realpath(root))
+
+
+class ProviderConfigDiagnostics(unittest.TestCase):
+    def test_unknown_provider_key_is_named_in_the_error(self):
+        cfg = {'version': 1, 'agents': [], 'roles': {},
+               'providers': {'nvidia': {'model': 'm', 'model_order': ['m']}}}
+        with self.assertRaises(ValueError) as ctx:
+            profiles.validate_config(cfg)
+        message = str(ctx.exception)
+        self.assertIn('nvidia', message)
+        self.assertIn('model_order', message)
+        self.assertIn('account_id', message)
+
+    def test_empty_account_id_is_treated_as_absent(self):
+        cfg = {'version': 1, 'agents': [], 'roles': {},
+               'providers': {'nvidia': {'account_id': '', 'model': 'm'}}}
+        clean = profiles.validate_config(cfg)
+        self.assertIsNone(clean['providers']['nvidia']['account_id'])
+        self.assertEqual(clean['providers']['nvidia']['model'], 'm')
+
+    def test_a_real_account_id_is_still_validated(self):
+        cfg = {'version': 1, 'agents': [], 'roles': {},
+               'providers': {'cloudflare': {'account_id': 'short', 'model': 'm'}}}
+        with self.assertRaises(ValueError) as ctx:
+            profiles.validate_config(cfg)
+        self.assertIn('32-character', str(ctx.exception))
+
+
+class OtherSpawnPathsSetPwd(unittest.TestCase):
+    def test_workflows_exec_sets_pwd(self):
+        with tempfile.TemporaryDirectory(dir=os.environ.get('TMPDIR')) as root:
+            rc, out, err, timed_out = workflows._exec(
+                [sys.executable, '-c', 'import os; print(os.environ.get("PWD"))'],
+                cwd=root, timeout=15)
+            self.assertFalse(timed_out)
+            self.assertEqual(rc, 0, err)
+            self.assertEqual(os.path.realpath(out.strip()), os.path.realpath(root))
 
 
 if __name__=='__main__': unittest.main()

@@ -336,9 +336,16 @@ def _validate_providers(providers):
     for name, spec in providers.items():
         if name not in KEY_ALIASES:
             _fail("unknown provider: %s" % name)
-        if not isinstance(spec, dict) or set(spec) - PROVIDER_KEYS:
-            _fail("provider %s has invalid settings" % name)
+        if not isinstance(spec, dict):
+            _fail("provider %s must be a mapping" % name)
+        unknown = sorted(set(spec) - PROVIDER_KEYS)
+        if unknown:
+            _fail("provider %s has unknown settings: %s (allowed: %s)"
+                  % (name, ", ".join(unknown), ", ".join(sorted(PROVIDER_KEYS))))
         account_id = spec.get("account_id")
+        # An empty string is how a hand-edited or older config spells "absent".
+        if isinstance(account_id, str) and not account_id.strip():
+            account_id = None
         model = spec.get("model")
         model_order = spec.get("model_order")
         if account_id is not None and account_id != "" and (not isinstance(account_id, str) or len(account_id) != 32):
