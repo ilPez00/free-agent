@@ -859,6 +859,58 @@ def kilo_login() -> dict:
 
 
 # ---------------------------------------------------------------------------
+# worker: continue (Continue CLI — free tier / BYOK)
+# ---------------------------------------------------------------------------
+
+def continue_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
+    return _generic_json_worker(["cn", "-p", "--format", "json", "--auto", task],
+                                task, workdir, timeout)
+
+
+def continue_extract(rc: int, out: str, err: str) -> Result:
+    return _generic_extract(rc, out, err)
+
+
+def continue_quota() -> dict:
+    return {"available": None, "pct": None,
+            "text": "Continue free tier (no CLI meter)", "logged_in": None}
+
+
+def continue_login() -> dict:
+    home = Path.home() / ".continue"
+    for name in ("auth.json", "credentials.json"):
+        if (home / name).is_file():
+            return {"logged_in": True, "text": f"~/{'.continue'}/{name} present"}
+    return {"logged_in": None, "text": "no ~/.continue/auth.json; run cn login"}
+
+
+# ---------------------------------------------------------------------------
+# worker: cody (Sourcegraph Cody CLI — Cody Free plan)
+# ---------------------------------------------------------------------------
+
+def cody_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
+    return _generic_json_worker(["cody", "chat", "-m", task, "-C", workdir],
+                                task, workdir, timeout)
+
+
+def cody_extract(rc: int, out: str, err: str) -> Result:
+    return _generic_extract(rc, out, err)
+
+
+def cody_quota() -> dict:
+    return {"available": None, "pct": None,
+            "text": "Cody Free plan (no CLI meter)", "logged_in": None}
+
+
+def cody_login() -> dict:
+    rc, out, err = run_cmd(["cody", "auth", "whoami"], timeout=40)
+    blob = strip_ansi(out + err)
+    if rc == 0 and blob.strip() and "not logged" not in blob.lower():
+        return {"logged_in": True, "text": blob.strip()[:120]}
+    return {"logged_in": None, "text": blob.strip()[:120] or "cody auth whoami returned nothing"}
+
+
+# ---------------------------------------------------------------------------
 # worker: crush (Charm Crush — BYOK / Hyper)
 # ---------------------------------------------------------------------------
 
@@ -1201,6 +1253,20 @@ WORKERS: dict[str, Worker] = {
         run=kilo_run, extract=kilo_extract, quota=kilo_quota, login=kilo_login,
         installed=lambda: shutil.which("kilo") is not None,
     ),
+    "continue": Worker(
+        name="continue", description="Continue CLI (free tier / BYOK, headless -p)",
+        priority=26, headless=True,
+        reauth="cn login",
+        run=continue_run, extract=continue_extract, quota=continue_quota, login=continue_login,
+        installed=lambda: shutil.which("cn") is not None,
+    ),
+    "cody": Worker(
+        name="cody", description="Sourcegraph Cody CLI (Cody Free plan)",
+        priority=27, headless=True,
+        reauth="cody auth login",
+        run=cody_run, extract=cody_extract, quota=cody_quota, login=cody_login,
+        installed=lambda: shutil.which("cody") is not None,
+    ),
     "codex": Worker(
         name="codex", description="[PLANNER] OpenAI Codex CLI (ChatGPT Pro/Free)",
         priority=14, headless=True,
@@ -1278,7 +1344,7 @@ for _name in ("copilot", "freepi", "freebuff"):
 
 # Unmetered/BYOK adapters must be explicitly selected: never silently spend a
 # configured paid provider just because the client itself is open source.
-for _name in ("cursor", "vibe", "crush", "qwen", "goose", "aider"):
+for _name in ("cursor", "vibe", "crush", "qwen", "goose", "aider", "continue", "cody"):
     WORKERS[_name].automatic = False
 WORKERS["amp"] = Worker("amp", "BYOK/subscription harness; no free inference promised", 80, True,
     "amp login", lambda task, wd, timeout: run_cmd(["amp", "--execute", task, "--stream-json", "--visibility", "private"], cwd=wd, timeout=timeout),
@@ -1287,7 +1353,8 @@ WORKERS["amp"] = Worker("amp", "BYOK/subscription harness; no free inference pro
 for _name in ("claude", "grok", "kimi", "vibe", "crush", "qwen", "goose", "aider", "cline", "codex"):
     WORKERS[_name].login = lambda: {"logged_in": None, "text": "Unknown until an authenticated run; directory presence is not proof"}
 for _name, _w in WORKERS.items():
-    _binary = {"kiro": "kiro-cli", "cursor": "agent", "freepi": "free-pi-cli"}.get(_name, _name)
+    _binary = {"kiro": "kiro-cli", "cursor": "agent", "freepi": "free-pi-cli",
+               "continue": "cn"}.get(_name, _name)
     if _name == "hermes":
         _w.installed = lambda: os.path.isfile(HERMES_BIN) and os.access(HERMES_BIN, os.X_OK)
     else:
