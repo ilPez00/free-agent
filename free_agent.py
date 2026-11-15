@@ -878,11 +878,14 @@ def continue_quota() -> dict:
 
 
 def continue_login() -> dict:
-    home = Path.home() / ".continue"
-    for name in ("auth.json", "credentials.json"):
-        if (home / name).is_file():
-            return {"logged_in": True, "text": f"~/{'.continue'}/{name} present"}
-    return {"logged_in": None, "text": "no ~/.continue/auth.json; run cn login"}
+    # Continue CLI has no `cn login` subcommand. It reuses the Vercel CLI data dir:
+    # $XDG_DATA_HOME/com.vercel.cli/auth.json (default ~/.local/share/com.vercel.cli).
+    data_home = Path(os.environ.get("XDG_DATA_HOME") or (Path.home() / ".local/share"))
+    auth = data_home / "com.vercel.cli" / "auth.json"
+    if auth.is_file():
+        return {"logged_in": True, "text": f"{auth} present"}
+    return {"logged_in": None,
+            "text": "no com.vercel.cli/auth.json; run `cn` interactively to sign in"}
 
 
 # ---------------------------------------------------------------------------
