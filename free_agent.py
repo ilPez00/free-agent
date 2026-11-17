@@ -1385,7 +1385,11 @@ _NON_FATAL_ERR = re.compile(
     r"(?i)(rmcp::transport|failed to load skill|tuicommander|"
     r"mcp.*(server|transport).*(error|closed|quit)|"
     r"experimentalwarning|node:\d+.*warning|"
-    r"shell_snapshot)"
+    r"shell_snapshot|"
+    # opencode plugin noise on stderr of a successful turn (measured
+    # 2026-11-17: "[auto-resume] event stream error: ... ctx.event.subscribe"
+    # with exit 0 and a full reply) — plugin state, not the model's answer.
+    r"\[auto-resume\]|\[openrtk\])"
 )
 
 
