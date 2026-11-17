@@ -203,7 +203,7 @@ class Worker:
 
 def oc_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
     return run_cmd(
-        ["opencode", "run", "--format", "json", "--agent", "build", "--auto", "--archived", task],
+        ["opencode", "run", "--format", "json", "--agent", "build", "--auto", task],
         cwd=workdir, timeout=timeout,
     )
 
