@@ -67,7 +67,12 @@ pi-together (trial), pi-deepinfra (trial).
   operator approval (backup first).
 - **zenmux**: payg-source keys cannot access the free models (403).
 - **omniroute :20128**: server up, API-key auth under investigation.
-- **freeglm / free-gateway :20530**: no binary found on air or pansa.
+- **freeglm / free-gateway :20530**: identified as a modified
+  `cuthbertnogood/opencode-free-gateway` — it spoofs the OpenCode client
+  fingerprint to reach Zen free-tier models from non-OpenCode clients
+  (ToS evasion, ban risk). Deliberately NOT installed/started. The
+  legitimate route to the same free pool is the `opencode` worker
+  (big-pickle etc.) already in Tier 0.
 - **github-models**: key accepted, catalog route unverified → no default model.
 - **kluster / tokenrouter / orcarouter / coarena / paws / yeta**: endpoints
   unreachable or unknown from air.
