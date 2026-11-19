@@ -93,6 +93,10 @@ CATALOG: list[dict] = [
     dict(name="qwen", binary="qwen", package="@qwen-code/qwen-code",
          auth="qwen login", free="daily", priority=52,
          note="Alibaba Qwen free models"),
+    dict(name="bl", binary="bl", package="bailian-cli",
+         auth="bl auth login --console --console-site international",
+         free="grant", priority=90,
+         note="Bailian text chat; qwen-flash-character 1M free tokens to 2027-02-10; text-only, no file edits"),
     dict(name="vibe", binary="vibe", package=None, auth="vibe login",
          free=None, priority=54, note="Mistral; BYOK"),
     dict(name="crush", binary="crush", package=None, auth="crush auth login",
@@ -137,6 +141,7 @@ ALLOW_SCRIPTS = {
     "@xai-official/grok": "--allow-scripts=@xai-official/grok",
     "@kilocode/cli": "--allow-scripts=@kilocode/cli",
     "@moonshot-ai/kimi-code": "--allow-scripts=@moonshot-ai/kimi-code",
+    "bailian-cli": "--allow-scripts=bailian-cli",
 }
 
 

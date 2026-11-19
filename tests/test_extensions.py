@@ -434,5 +434,40 @@ class LearnTests(Base):
         self.assertEqual(document["metadata"]["check_exit"], 0)
 
 
+class CliAgentWorkerLoading(Base):
+    """Regression: the config_path parameter used to shadow the module-level
+    config_path() function, so default-path loading raised TypeError. The
+    free_agent merge wraps the call in try/except pass, which silently dropped
+    every cli_agents worker instead of reporting the error."""
+
+    def entry(self, name="bl-test"):
+        return {
+            "name": name,
+            "command": ["echo", "{task}"],
+            "headless": True,
+            "automatic": False,
+            "priority": 50,
+            "roles": ["executor"],
+            "specialty": "test",
+            "timeout": 300,
+            "env": {},
+        }
+
+    def test_default_path_loads_cli_agents(self):
+        self.write_config({"version": 1, "agents": [], "roles": {},
+                           "cli_agents": [self.entry()]})
+        workers = extensions._load_cli_agent_workers(fa)
+        self.assertIn("bl-test", workers)
+
+    def test_explicit_path_loads_cli_agents(self):
+        other = self.tmp / "other.json"
+        other.write_text(json.dumps({"version": 1, "agents": [], "roles": {},
+                                     "cli_agents": [self.entry("explicit")]}),
+                         encoding="utf-8")
+        workers = extensions._load_cli_agent_workers(fa, path=str(other))
+        self.assertIn("explicit", workers)
+        self.assertNotIn("bl-test", workers)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -907,12 +907,12 @@ def cmd_cli_agents(args) -> int:
     return _fail(args, "unknown cli_agents command")
 
 
-def _load_cli_agent_workers(fa, config_path=None):
+def _load_cli_agent_workers(fa, path=None):
     """Load CLI agents from config and create Worker objects."""
-    if config_path is None:
-        config_path = config_path()
+    if path is None:
+        path = config_path()
     try:
-        config = profiles.load_config(config_path)
+        config = profiles.load_config(path)
     except (ValueError, OSError):
         return {}
     cli_agents = config.get("cli_agents", [])
