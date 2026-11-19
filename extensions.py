@@ -214,6 +214,9 @@ def _pi_worker(fa, provider: str, automatic: bool, priority: int):
         if _key(provider):
             return {"logged_in": None, "credential_present": True,
                     "text": f"{provider}: credential present (unverified)"}
+        if pv.PROVIDERS.get(provider, {}).get("keyless"):
+            return {"logged_in": None, "credential_present": False,
+                    "text": f"{provider}: keyless endpoint; no credential needed"}
         return {"logged_in": False, "credential_present": False,
                 "text": f"{provider}: no credential"}
 
@@ -255,7 +258,7 @@ def _pi_workers(fa):
             continue
         if cfg.get("free_policy") in ("paid_or_trial_opt_in", "credential_only"):
             continue
-        if not _key(name):
+        if not _key(name) and not cfg.get("keyless"):
             continue
         model = _pi_model(name)
         if not model:

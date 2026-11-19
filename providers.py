@@ -252,7 +252,7 @@ PROVIDERS = {
     },
     "pollinations-ai": {
         "base_url": "https://gen.pollinations.ai/v1",
-        "free_policy": "account_free_tier_unverified", "pi": True,
+        "free_policy": "account_free_tier_unverified", "pi": True, "keyless": True,
     },
     "qwen-alibaba": {
         "base_url": "https://dashscope-intl.aliyuncs.com/api/v1",
@@ -342,6 +342,42 @@ PROVIDERS = {
         "base_url": "https://zro.moonmath.ai/v1",
         "free_policy": "account_free_tier_unverified", "pi": True,
     },
+    "apifreellm": {
+        "base_url": "https://apifreellm.com/api/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "zenmux": {
+        "base_url": "https://zenmux.ai/api/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "venice": {
+        "base_url": "https://api.venice.ai/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "github-models": {
+        "base_url": "https://models.github.ai/inference",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "agnes-ai": {
+        "base_url": "https://apihub.agnes-ai.com/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
+    "gptoss-proxy": {
+        "base_url": "https://broken-water-d859.junioralive.workers.dev/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True, "keyless": True,
+    },
+    "g4f": {
+        "base_url": "https://g4f.space/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True, "keyless": True,
+    },
+    "ollama-public": {
+        "base_url": "http://108.181.196.208:11434/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True, "keyless": True,
+    },
+    "commandcode": {
+        "base_url": "https://api.commandcode.ai/provider/v1",
+        "free_policy": "account_free_tier_unverified", "pi": True,
+    },
 }
 
 # Only these two have a default model; every other provider needs an explicit one.
@@ -376,7 +412,7 @@ DEFAULT_MODELS = {
     "mixlayer": "meta-llama/llama-3.3-70b-instruct",
     "moark": "meta-llama/llama-3.3-70b-instruct",
     "modelscope": "Qwen/Qwen2.5-Coder-32B-Instruct",
-    "nous-portal": "meta-llama/llama-3.3-70b-instruct",
+    "nous-portal": "qwen/qwen4-max:free",
     "novai": "meta-llama/llama-3.3-70b-instruct",
     "opentyphoon": "meta-llama/llama-3.3-70b-instruct",
     "requesty": "meta-llama/llama-3.3-70b-instruct",
@@ -386,6 +422,18 @@ DEFAULT_MODELS = {
     "vectoree": "meta-llama/llama-3.3-70b-instruct",
     "vlm-run": "meta-llama/llama-3.3-70b-instruct",
     "zro": "meta-llama/llama-3.3-70b-instruct",
+    "apifreellm": "apifree-flash",
+    "zenmux": "z-ai/glm-4.7-flash-free",
+    "venice": "llama-3.3-70b",
+    "agnes-ai": "agnes-3.0-flash",
+    "gptoss-proxy": "gpt-oss-120b",
+    "g4f": "auto",
+    "ollama-public": "llama3.2:latest",
+    "aihubmix": "nemotron-3.5-super-vl-free",
+    "api-airforce": "gpt-oss-120b",
+    "kilo-ai-gateway": "kilo-auto/free",
+    "ollama-cloud": "gpt-oss:120b",
+    "commandcode": "stealth/glyph-cluster:free",
 }
 
 AUTO_DEFAULT_MODELS = {
@@ -548,11 +596,13 @@ _TOOLS_READ_ONLY = "read,grep,find,ls"
 _TOOLS_WRITE = "read,bash,write,edit"
 
 
-def _write_pi_config(tmp: str, provider: str, model: str, base_url: str) -> None:
+def _write_pi_config(tmp: str, provider: str, model: str, base_url: str,
+                     keyless: bool = False) -> None:
     models = {"providers": {f"fa-{provider}": {
         "baseUrl": base_url,
         "api": "openai-completions",
-        "apiKey": "${" + KEY_VAR + "}",
+        # Keyless endpoints ignore Authorization; pi still wants a non-empty value.
+        "apiKey": "keyless" if keyless else "${" + KEY_VAR + "}",
         "models": [{"id": model, "contextWindow": 65536,
                     "maxTokens": 8192, "input": ["text"]}],
     }}}
@@ -645,8 +695,9 @@ def run_pi(provider: str, model: str, task: str, workdir: str, timeout: float,
     if not model:
         return 2, "", f"{provider}: explicit model required"
     key = get_key(provider, env_path)
-    if not key:
+    if not key and not cfg.get("keyless"):
         return 78, "", f"{provider}: no credential"
+    key = key or ""
     if provider == "openrouter":
         found = {m["id"] for m in discover(provider, env_path).get("models", [])}
         if model not in found:
@@ -660,7 +711,8 @@ def run_pi(provider: str, model: str, task: str, workdir: str, timeout: float,
 
     tmp = tempfile.mkdtemp(prefix="fa-pi-")
     try:
-        _write_pi_config(tmp, provider, model, cfg["base_url"])
+        _write_pi_config(tmp, provider, model, cfg["base_url"],
+                         keyless=bool(cfg.get("keyless")))
         rc, out, err = _spawn(cmd, workdir, timeout, _child_env(tmp, key))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

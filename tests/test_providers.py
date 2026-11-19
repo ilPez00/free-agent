@@ -305,5 +305,72 @@ class RunPiTests(unittest.TestCase):
         self.assertIn("could not launch", err)
 
 
+class KeylessProviderTests(unittest.TestCase):
+    """Keyless free endpoints (gptoss-proxy, g4f, ollama-public, pollinations-ai)
+    must run without a credential and never borrow another provider's key."""
+
+    def setUp(self):
+        FakePopen.instances = []
+
+    def test_keyless_runs_without_credential(self):
+        with profiles({}), patch.object(pv.subprocess, "Popen", FakePopen):
+            rc, out, err = pv.run_pi("gptoss-proxy", "gpt-oss-120b", "task", "/tmp", 10, ENV)
+        self.assertEqual(rc, 0, err)
+        models = FakePopen.instances[0].models
+        self.assertEqual(models["providers"]["fa-gptoss-proxy"]["apiKey"], "keyless")
+
+    def test_keyless_uses_default_model(self):
+        with profiles({}), patch.object(pv.subprocess, "Popen", FakePopen):
+            rc, out, err = pv.run_pi("g4f", "", "task", "/tmp", 10, ENV)
+        # g4f has a DEFAULT_MODELS entry but is not an AUTO_DEFAULT route, so an
+        # explicit model is still required (paid-account safety rule).
+        self.assertEqual(rc, 2)
+        self.assertIn("explicit model required", err)
+
+    def test_keyed_provider_still_requires_credential(self):
+        with profiles({}), patch.object(pv.subprocess, "Popen", FakePopen):
+            rc, _, err = pv.run_pi("zenmux", "z-ai/glm-4.7-flash-free", "task", "/tmp", 10, ENV)
+        self.assertEqual(rc, 78)
+        self.assertIn("no credential", err)
+        self.assertEqual(FakePopen.instances, [])
+
+    def test_keyless_flag_is_explicit(self):
+        for name in ("gptoss-proxy", "g4f", "ollama-public", "pollinations-ai"):
+            self.assertTrue(pv.PROVIDERS[name].get("keyless"), name)
+        for name in ("zenmux", "apifreellm", "venice", "nvidia"):
+            self.assertFalse(pv.PROVIDERS[name].get("keyless"), name)
+
+
+class FreeRouteWiringTests(unittest.TestCase):
+    def test_every_provider_slug_has_key_aliases_entry(self):
+        import profiles as pr
+        missing = set(pv.PROVIDERS) - set(pr.KEY_ALIASES)
+        self.assertEqual(missing, set(), f"slugs missing from KEY_ALIASES: {missing}")
+
+    def test_new_free_routes_have_defaults(self):
+        for name in ("apifreellm", "zenmux", "venice", "agnes-ai",
+                     "gptoss-proxy", "g4f", "ollama-public"):
+            self.assertIn(name, pv.DEFAULT_MODELS, name)
+            self.assertTrue(pv.PROVIDERS[name]["pi"], name)
+
+    def test_env_alias_coverage(self):
+        import profiles as pr
+        expect = {
+            "openrouter": ("openrouterU", "openrouter_management", "OPENROUTER2"),
+            "groq-cloud": ("GROQ_AI2",),
+            "mistral": ("MISTRAL_AI1", "MISTRAL_AI2"),
+            "gemini": ("GOOGLE_AI_STUDIO1", "GOOGLE_AI_STUDIO33"),
+            "z-ai": ("Z_AI_GLM_KEY",),
+            "nous-portal": ("NOUS",),
+            "llm7-io": ("PROXY_LLM7",),
+            "apifreellm": ("API_FREE_LLM_KEY", "FREEAIAPIKEY"),
+            "zenmux": ("ZENMUX", "zenmuxpayg"),
+            "github-models": ("AI_GITHUB_TOKEN",),
+        }
+        for prov, names in expect.items():
+            for n in names:
+                self.assertIn(n, pr.KEY_ALIASES[prov], f"{prov}: {n}")
+
+
 if __name__ == "__main__":
     unittest.main()
