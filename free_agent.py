@@ -415,6 +415,8 @@ def pi_login() -> dict:
 # ---------------------------------------------------------------------------
 
 FB_SESSION = "fa-fb"
+# Status-bar label expected before the task runs (set from the CLI --model flag).
+FREE_AGENT_FREEBUFF_MODEL = os.environ.get("FREE_AGENT_FREEBUFF_MODEL", "")
 
 
 def _tmux(*args: str, timeout: float = 20) -> tuple[int, str, str]:
@@ -463,6 +465,13 @@ def fb_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
     if "Press ENTER to login" in pane:
         _tmux("kill-session", "-t", FB_SESSION)
         return 3, pane, "freebuff is not logged in (Press ENTER to login)"
+    # freebuff's model lives in ~/.config/manicode/settings.json, not in a flag.
+    # Refuse when the status bar does not show the expected one.
+    if FREE_AGENT_FREEBUFF_MODEL:
+        want = FREE_AGENT_FREEBUFF_MODEL.replace("-", " ").lower()
+        if want not in pane.lower():
+            _tmux("kill-session", "-t", FB_SESSION)
+            return 4, pane, f"freebuff model not selected: {FREE_AGENT_FREEBUFF_MODEL}"
     _tmux("send-keys", "-t", FB_SESSION, "-l", task)
     _tmux("send-keys", "-t", FB_SESSION, "Enter")
     # Wait for freebuff's completion marker ("• 8s •") to appear AND the pane to
@@ -494,6 +503,10 @@ def fb_extract(rc: int, out: str, err: str) -> Result:
     if rc == 3:
         return Result(ok=False, text="", exhausted=False, auth_required=True,
                       reason="freebuff not logged in")
+    if rc == 4:
+        return Result(ok=False, text="", exhausted=False, auth_required=False,
+                      reason=err or "model not selected",
+                      model=f"freebuff/{FREE_AGENT_FREEBUFF_MODEL}")
     lines = out.splitlines()
     # The assistant reply sits between the echoed task (which ends with the ⎘
     # paste marker) and freebuff's timing marker ("• 8s •"). Everything else is
@@ -521,7 +534,7 @@ def fb_extract(rc: int, out: str, err: str) -> Result:
         text = "\n".join(ln.strip() for ln in lines if ln.strip())[-800:].strip()
     ok = rc == 0 and bool(text) and not ex and not au
     return Result(ok=ok, text=text, exhausted=ex, auth_required=au, reason=reason,
-                  model="freebuff-default")
+                  model=f"freebuff/{FREE_AGENT_FREEBUFF_MODEL or 'default'}")
 
 
 def fb_quota() -> dict:
@@ -1589,9 +1602,10 @@ def cmd_run_replay(args, workdir: str) -> int:
 
 
 def cmd_run(args) -> int:
-    global FREEPI_MODEL
+    global FREEPI_MODEL, FREE_AGENT_FREEBUFF_MODEL
     if getattr(args, "model", None):
         FREEPI_MODEL = args.model
+        FREE_AGENT_FREEBUFF_MODEL = args.model
     state = load_state()
     workdir = os.path.abspath(args.workdir or os.getcwd())
     if not os.path.isdir(workdir):
