@@ -666,8 +666,13 @@ def freepi_installed() -> bool:
     return shutil.which("free-pi-cli") is not None
 
 
+# Selected in the TUI picker before the task because free-pi exposes no --model.
+FREEPI_MODEL = os.environ.get("FREE_AGENT_FREEPI_MODEL", "")
+
+
 def pty_generic(cmd: list[str], ready_markers: list[str], task: str,
-                workdir: str, timeout: float, session: str) -> tuple[int, str, str]:
+                workdir: str, timeout: float, session: str,
+                model: str = "") -> tuple[int, str, str]:
     """Drive a TUI-only agent in tmux: start it, type the task, capture the pane."""
     _tmux("kill-session", "-t", session)
     rc, out, err = _tmux("new-session", "-d", "-s", session, "-c", workdir, "-x", "220", "-y", "50")
@@ -676,6 +681,21 @@ def pty_generic(cmd: list[str], ready_markers: list[str], task: str,
     time.sleep(1.5)
     _tmux("send-keys", "-t", session, " ".join(shlex.quote(c) for c in cmd), "Enter")
     pane = _fb_wait_session(session, ready_markers, 90)
+    if model:
+        # TUI-only: there is no flag, so select the model in the picker and
+        # refuse to run when the status bar does not show it afterwards.
+        _tmux("send-keys", "-t", session, "-l", "/model")
+        _tmux("send-keys", "-t", session, "Enter")
+        time.sleep(4)
+        _tmux("send-keys", "-t", session, "-l", model)
+        time.sleep(3)
+        _tmux("send-keys", "-t", session, "Enter")
+        time.sleep(5)
+        pane = _fb_pane_session(session)
+        want = model.replace("-", " ").lower()
+        if want not in pane.lower():
+            _tmux("kill-session", "-t", session)
+            return 4, pane, f"model not selected: {model}"
     _tmux("send-keys", "-t", session, "-l", task)
     _tmux("send-keys", "-t", session, "Enter")
     # Wait until the pane actually changes from its post-submit state (the reply
@@ -723,8 +743,9 @@ def _fb_wait_session(session: str, markers: list[str], timeout: float, stability
 
 
 def freepi_run(task: str, workdir: str, timeout: float) -> tuple[int, str, str]:
-    return pty_generic(["free-pi-cli"], ["Ask", "prompt", "›", "free-pi", "Chat", "Type", "chat"],
-                       task, workdir, timeout, "fa-freepi")
+    return pty_generic(["free-pi-cli"],
+                       ['Try "explain this repo"', "Type your message", "Enter a coding task"],
+                       task, workdir, timeout, "fa-freepi", model=FREEPI_MODEL)
 
 
 def freepi_extract(rc: int, out: str, err: str) -> Result:
@@ -756,8 +777,12 @@ def freepi_extract(rc: int, out: str, err: str) -> Result:
     text = "\n".join(blocks[-1]).strip() if len(blocks) >= 2 else ""
     blob = out + "\n" + err
     ex, au, reason = classify(blob)
+    if rc == 4:
+        return Result(ok=False, text="", exhausted=False, auth_required=False,
+                      reason=err or "model not selected", model=f"free-pi/{FREEPI_MODEL}")
     ok = rc == 0 and bool(text) and not ex and not au
-    return Result(ok=ok, text=text, exhausted=ex, auth_required=au, reason=reason)
+    return Result(ok=ok, text=text, exhausted=ex, auth_required=au, reason=reason,
+                  model=f"free-pi/{FREEPI_MODEL or 'default'}")
 
 
 def freepi_quota() -> dict:
@@ -1564,6 +1589,9 @@ def cmd_run_replay(args, workdir: str) -> int:
 
 
 def cmd_run(args) -> int:
+    global FREEPI_MODEL
+    if getattr(args, "model", None):
+        FREEPI_MODEL = args.model
     state = load_state()
     workdir = os.path.abspath(args.workdir or os.getcwd())
     if not os.path.isdir(workdir):
@@ -1772,6 +1800,8 @@ def main(argv: list[str] | None = None) -> int:
                    default=os.environ.get("FREE_AGENT_WORKFLOW_MANIFEST"))
     r.add_argument("--timeout", type=float, default=600)
     r.add_argument("--force", action="store_true", help="retry exhausted workers")
+    r.add_argument("--model", default=None,
+                   help="free-pi only: model id selected in the TUI picker (e.g. glm-5.3-flash)")
     r.add_argument("--no-notify", action="store_true")
     r.add_argument("--json", action="store_true")
     r.set_defaults(func=cmd_run)
