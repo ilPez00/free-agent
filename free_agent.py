@@ -715,6 +715,7 @@ def pty_generic(cmd: list[str], ready_markers: list[str], task: str,
     # has streamed in) and then settles. Breaking on stability alone fires
     # while the model is still thinking, before any answer exists.
     baseline = _fb_pane_session(session)
+    submitted = time.time()
     deadline = time.time() + timeout
     last, stable = None, 0
     while time.time() < deadline:
@@ -722,7 +723,9 @@ def pty_generic(cmd: list[str], ready_markers: list[str], task: str,
         if pane != baseline:
             if pane == last:
                 stable += 1
-                if stable >= 4:
+                # A stable pane can be a worker blocked in a shell command, not
+                # an idle one; never break in the first minute after submit.
+                if stable >= 4 and time.time() - submitted > 60:
                     break
             else:
                 stable = 0
