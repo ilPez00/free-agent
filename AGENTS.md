@@ -10,6 +10,11 @@ Proceed with free-agent orchestration for development work whenever possible.
   live quota headroom and fails over automatically.
 - Bounded build/verify loops:
   `free-agent loop "<task>" -w <repo> --check "<cmd>" --max-iterations N`.
+- Pin the TUI worker's model: `--model glm-5.3-flash` (free-pi) or
+  `--model deepseek-v4.1-flash-slow` (freebuff). free-pi exposes no `--model`
+  flag and does not persist its picker default, so without this the run
+  silently answers on Particle-1; both drivers now refuse to start when the
+  status bar does not show the requested model.
 - Planners/orchestrators: `--planner bl` (Bailian qwen4-max) or `--planner bl-flash`
   (qwen-flash-character, verified free); other planners: codex, claude, grok, kimi, agy.
 - Check pool state first: `free-agent status`. Workers include freebuff/free-pi
